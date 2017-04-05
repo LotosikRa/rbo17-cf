@@ -44,7 +44,9 @@ def get_user_input():
             assert x >= 0
             assert y >= 0
             array.append((x, y))
-        return cols, rows, total, goal, array
+        indata = cols, rows, total, goal, array
+        print('You have entered (in this order)..: {}'.format(str(indata)))
+        return indata
     except Exception as e:
         print(e)
         print('Check enter values.')
@@ -54,8 +56,12 @@ def main():
     print('Hello World!')
     while input('Press `Y` to continue: ') in ['Y', '']:
         indata = get_user_input()
-        print(indata)
-        print('You have `{}` points!'.format(calculate(*indata)))
+        try:
+            outdata = calculate(*indata)
+        except Exception as e:
+            print(e)
+        else:
+            print('You have `{}` points!'.format(outdata))
     else:
         print('Goodbye!')
 
