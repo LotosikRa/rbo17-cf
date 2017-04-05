@@ -9,78 +9,129 @@ def greatest_common_divisor(a, b):
     return a
 
 
-class Unique:
-    all = []
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-    def register(self):
-        for item in self.all:
-            if self == item:
-                del self  # very dangerous place !!!
-                break
-        else:
-            self.all.append(self)
-
-
-class Dot(Unique):
+class Dot:
     """ Represents dots on the xOy (e.g. checkers on the field). """
-    Hand = Hand
+    dots = []
 
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.hands = []
-        self.register()
+        self.hands = {}
 
     def build_hands(self):
-        for dot in self.all:
-            if dot != self:
-                self.Hand(self, dot)
+        for dot in self.dots:
+            if dot != self:  # if it is another dot
+                hand = Hand(self, dot).register()  # add hand to storage
+
+    def check_connection(self, hand, dot):
+        """ Checks if self have connection to this dot by this hand"""
+        if hand in self.hands:
+            Chain(hand, self).register().add(self.hands[hand]).register().add(dot)
+        else:
+            self.hands[hand] = dot
+
+    def register(self):
+        for item in self.dots:
+            if self.x == item.x and self.y == item.y:
+                del self  # very dangerous place !!!
+                return False
+        else:
+            self.dots.append(self)
+            return True
 
 
-class Hand(Unique):
+class Hand:
     """ Represents connections between Dots (e.g. lines between checkers). """
+    hands = []
 
     def __init__(self, dot1, dot2):
         self.x, self.y = self.calculate_vector(dot1, dot2)
-        self.register()
 
     @staticmethod
     def calculate_vector(dot1: Dot, dot2: Dot):
         x = abs(dot1.x - dot2.x)
         y = abs(dot1.y - dot2.y)
-        gcd = greatest_common_divisor(x, y)
-        return x/gcd, y/gcd
+        if 0 in [x, y]:
+            return x, y
+        gcd = greatest_common_divisor(max(x,y), min(x, y))
+        return int(x/gcd), int(y/gcd)
+
+    def __hash__(self):
+        return id(self).__hash__()
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
+    def register(self):
+        for item in self.hands:
+            if self == item:
+                del self  # very dangerous place !!!
+                return item
+        else:
+            self.hands.append(self)
+            return self
 
 
-class Chain(Unique):
+class Chain:
     """ Represents groups of Dots connected with the same Hands (e.g. checkers on one line). """
+    chains = []
 
-    def __init__(self, hand, dot1, dot2):
+    def __init__(self, hand, dot1):
         self.hand = hand
-        self.dots = [dot1, dot2]
-        self.register()
+        self.dots = [dot1]
+        self.len = 1
 
     def _add_dot(self, dot):
         if not dot in self.dots:
             self.dots.append(dot)
+            return True
+        else:
+            return False
 
     def add(self, dot):
-        self._add_dot(dot)
-        return len(self.dots)
+        if self._add_dot(dot):
+            self.len += 1
+        return self
+
+    def _check_in(self, other):
+        for dot in self.dots:
+            if dot in other.dots:
+                return True
+        else:
+            return False
+
+    def _merge_in(self, other):
+        for dot in self.dots:
+            if dot not in other.dots:
+                other.add(dot)
+
+    def register(self):
+        for item in self.chains:
+            if self.hand == item.hand and self._check_in(item):
+                self._merge_in(item)
+                del self
+                return item
+        else:
+            self.chains.append(self)
+            return self
 
 
 # steps
 def init_dots(array: list):
     for x, y in array:
-        Dot(x, y)
+        Dot(x, y).register()
 
 
 def init_hands():
-    for dot in Dot.all:
+    for dot in Dot.dots:
         dot.build_hands()
+
+
+def init_chains():
+    for dot1 in Dot.dots:
+        for dot2 in Dot.dots:
+            for hand in Hand.hands:
+                dot1.check_connection(hand, dot2)
 
 
 # main function
@@ -95,6 +146,7 @@ def calculate(x_long, y_long, total_dots, goal, input_array):
     """
     init_dots(input_array)
     init_hands()
+    init_chains()
 
     points = 0
     return points
