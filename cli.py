@@ -1,5 +1,6 @@
 """ This module runs algorithm with CLI. """
 from app import calculate
+from settings import CHECKERS, COLUMNS, ROWS, GOAL
 
 
 def get_user_input():
@@ -20,10 +21,16 @@ def get_user_input():
     +---+---+-
     |   |   |
     """)
-    cols = input('Enter number of the columns: ')
-    rows = input('Enter number of the rows: ')
-    total = input('Enter total number of the checkers: ')
-    goal = input('Enter how many checkers must in one line: ')
+    if input('Use defaults? (Y, *): ') != 'Y':
+        cols = input('Enter number of the columns: ')
+        rows = input('Enter number of the rows: ')
+        total = input('Enter total number of the checkers: ')
+        goal = input('Enter how many checkers must in one line: ')
+    else:
+        cols = COLUMNS
+        total = CHECKERS
+        rows = ROWS
+        goal = GOAL
     string = input('Enter coordinates of each checker in the format `2,3 5,10`: ')
     try:
         for item in [cols, rows, total, goal]:
@@ -46,8 +53,9 @@ def get_user_input():
 def main():
     print('Hello World!')
     while input('Press `Y` to continue: ') in ['Y', '']:
-        print(get_user_input())
-        print('You have `{}` points!'.format(calculate(get_user_input())))
+        indata = get_user_input()
+        print(indata)
+        print('You have `{}` points!'.format(calculate(*indata)))
     else:
         print('Goodbye!')
 
