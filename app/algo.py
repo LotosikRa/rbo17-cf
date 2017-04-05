@@ -18,7 +18,7 @@ class Unique:
     def register(self):
         for item in self.all:
             if self == item:
-                del self
+                del self  # very dangerous place !!!
                 break
         else:
             self.all.append(self)
@@ -26,12 +26,18 @@ class Unique:
 
 class Dot(Unique):
     """ Represents dots on the xOy (e.g. checkers on the field). """
+    Hand = Hand
 
     def __init__(self, x, y):
         self.x = x
         self.y = y
         self.hands = []
         self.register()
+
+    def build_hands(self):
+        for dot in self.all:
+            if dot != self:
+                self.Hand(self, dot)
 
 
 class Hand(Unique):
@@ -67,9 +73,14 @@ class Chain(Unique):
 
 
 # steps
-def init_dots(array):
+def init_dots(array: list):
     for x, y in array:
         Dot(x, y)
+
+
+def init_hands():
+    for dot in Dot.all:
+        dot.build_hands()
 
 
 # main function
@@ -83,6 +94,7 @@ def calculate(x_long, y_long, total_dots, goal, input_array):
     :return: points
     """
     init_dots(input_array)
+    init_hands()
 
     points = 0
     return points
