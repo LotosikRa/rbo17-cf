@@ -9,29 +9,37 @@ def greatest_common_divisor(a, b):
     return a
 
 
-class Dot:
+class Unique:
+    all = []
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def register(self):
+        for item in self.all:
+            if self == item:
+                del self
+                break
+        else:
+            self.all.append(self)
+
+
+class Dot(Unique):
     """ Represents dots on the xOy (e.g. checkers on the field). """
-    dots = []
 
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.hands = []
         self.register()
 
-    def register(self):
-        self.dots.append(self)
 
-
-class Hand:
+class Hand(Unique):
     """ Represents connections between Dots (e.g. lines between checkers). """
-    hands = []
 
     def __init__(self, dot1, dot2):
         self.x, self.y = self.calculate_vector(dot1, dot2)
         self.register()
-
-    def register(self):
-        self.hands.append(self)
 
     @staticmethod
     def calculate_vector(dot1: Dot, dot2: Dot):
@@ -39,6 +47,23 @@ class Hand:
         y = abs(dot1.y - dot2.y)
         gcd = greatest_common_divisor(x, y)
         return x/gcd, y/gcd
+
+
+class Chain(Unique):
+    """ Represents groups of Dots connected with the same Hands (e.g. checkers on one line). """
+
+    def __init__(self, hand, dot1, dot2):
+        self.hand = hand
+        self.dots = [dot1, dot2]
+        self.register()
+
+    def _add_dot(self, dot):
+        if not dot in self.dots:
+            self.dots.append(dot)
+
+    def add(self, dot):
+        self._add_dot(dot)
+        return len(self.dots)
 
 
 # steps
