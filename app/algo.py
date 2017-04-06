@@ -22,6 +22,7 @@ class Dot:
         for dot in self.dots:
             if dot != self:  # if it is another dot
                 hand = Hand(self, dot).register()  # add hand to storage
+                self.check_connection(hand, dot)
 
     def check_connection(self, hand, dot):
         """ Checks if self have connection to this dot by this hand"""
@@ -127,11 +128,12 @@ def init_hands():
         dot.build_hands()
 
 
-def init_chains():
-    for dot1 in Dot.dots:
-        for dot2 in Dot.dots:
-            for hand in Hand.hands:
-                dot1.check_connection(hand, dot2)
+def search_goals(goal):
+    points = 0
+    for chain in Chain.chains:
+        if chain.len >= goal:
+            points += 1
+    return points
 
 
 # main function
@@ -146,7 +148,5 @@ def calculate(x_long, y_long, total_dots, goal, input_array):
     """
     init_dots(input_array)
     init_hands()
-    init_chains()
-
-    points = 0
+    points = search_goals(goal)
     return points
