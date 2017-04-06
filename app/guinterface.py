@@ -6,13 +6,20 @@ from .algo import calculate
 
 class Field:
     """ Represents Checkers field. """
+
+    # store defaults
+    _columns = s.COLUMNS
+    _rows = s.ROWS
+    _checkers = s.CHECKERS
+    _goal = s.GOAL
+    # graphics
+    _active_background = 'black'
+    _not_active_background = 'white'
+    _active_font = 'white'
+    _not_active_font = 'black'
+
     def __init__(self, frame):
         self.frame = frame
-        # store defaults
-        self._columns = s.COLUMNS
-        self._rows = s.ROWS
-        self._checkers = s.CHECKERS
-        self._goal = s.GOAL
         # define attributes
         self.goal = None
         self.checkers = None
@@ -32,27 +39,47 @@ class Field:
         # draw widgets
         for y in range(self.rows):
             for x in range(self.columns):
-                widget = Button(self.frame,
-                                text='{},{}'.format(x,y),
-                                background='white',
-                                height=2, width=2,
-                                command=self._press(x, y),)
+                text = '{},{}'.format(x,y)
+                widget = Button(
+                    self.frame,
+                    text=text,
+                    background=self._not_active_background,
+                    foreground=self._not_active_font,
+                    height=2,
+                    width=2,
+                    command=self._press(text),
+                )
                 widget.grid(row=y, column=x, padx=5, pady=5)
-                self._widgets_list.append(widget)
+                self._register_widget(widget)
 
-    def _press(self, x, y):
+    def _register_widget(self, widget):
+        self._widgets_list.append(widget)
+        self.widgets_map[widget['text']] = widget
+
+    def _remove_widget(self, widget):
+        widget.grid_forget()
+        self.widgets_map.pop(widget['text'])
+        del widget
+
+    def _press(self, text):
+        x, y = text.split(',')
+        x, y = int(x), int(y)
         def command():
-            index = self.checkers_used_list.index((x, y))
-            if index != -1:
-                self.checkers_used_list.pop(index)
-            else:
+            try:
+                index = self.checkers_used_list.index((x, y))
+            except ValueError:
                 self.checkers_used_list.append((x, y))
+                self.widgets_map[text]['background'] = self._active_background
+                self.widgets_map[text]['foreground'] = self._active_font
+            else:
+                self.checkers_used_list.pop(index)
+                self.widgets_map[text]['background'] = self._not_active_background
+                self.widgets_map[text]['foreground'] = self._not_active_font
         return command
 
     def clear(self):
         for widget in self._widgets_list:
-            widget.grid_forget()
-            del widget
+            self._remove_widget(widget)
 
     def get_input(self):
         output = self.checkers_used_list.copy()
@@ -99,15 +126,15 @@ class GUI:
         self.field = Field(self.field_frame)
 
     def draw_field(self):
-        print('Drawing field...')
         self.field.draw()
 
     def clear_field(self):
-        print('Clearing field...')
         self.field.clear()
 
     def calculate(self):
-        print('Calculating...')
+        input = self.field.get_input()
+        output = calculate(input)
+        print('{}\n\t{}'.format(input, output))
 
 
 # main
