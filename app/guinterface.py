@@ -1,7 +1,7 @@
 """ This module contains all GUI needs. """
 from tkinter import *
 import settings as s
-from .algo import calculate
+import app.algo as a
 
 
 class Field:
@@ -11,14 +11,12 @@ class Field:
     _columns = s.COLUMNS
     _rows = s.ROWS
     _checkers = s.CHECKERS
-    _goal = s.GOAL
 
     def __init__(self, frame):
         self.frame = frame
         DotButton.frame = frame
         DotButton.field = self
         # define attributes
-        self.goal = None
         self.checkers = None
         self.rows = None
         self.columns = None
@@ -27,7 +25,6 @@ class Field:
         self.checkers_used_list = []
 
     def draw(self, **kwargs):
-        self.goal = kwargs.get('goal', self._goal)
         self.checkers = kwargs.get('checkers', self._checkers)
         self.rows = kwargs.get('rows', self._rows)
         self.columns = kwargs.get('columns', self._columns)
@@ -40,11 +37,10 @@ class Field:
         for widget in DotButton.widgets_map.values():
             widget.grid_forget()
             del widget
+        self.checkers_used_list = []
 
     def get_input(self):
-        output = self.checkers_used_list.copy()
-        self.checkers_used_list = []
-        return output
+        return self.checkers_used_list
 
 
 class DotButton:
@@ -93,11 +89,14 @@ class DotButton:
 class GUI:
     """ Represents GUI tkinter application. """
 
+    _goal = s.GOAL
+
     def __init__(self, master):
         self.master = master
         self._define_frames()
         self._define_menu()
         self._define_field()
+        self.goal = None
 
     def _define_frames(self):
         self.field_frame = Frame(self.master)
@@ -134,8 +133,11 @@ class GUI:
         self.field.clear()
 
     def calculate(self):
+        if not self.goal:
+            self.goal = self._goal
         input = self.field.get_input()
-        output = calculate(input)
+        output = a.calculate(input, self.goal)
+        # log it
         print('{}\n\t{}'.format(input, output))
 
 
