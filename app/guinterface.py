@@ -1,5 +1,6 @@
 """ This module contains all GUI needs. """
 from tkinter import *
+from tkinter import messagebox as tkmb
 import settings as s
 import app.algo as a
 
@@ -159,8 +160,12 @@ class GUI:
             self.goal = self._goal
         input = self.field.get_input()
         output = a.calculate(input, self.goal)
+        self.show_points(output)
         # log it
         print('{}\n\t{}'.format(input, output))
+
+    def show_points(self, points):
+        tkmb.showinfo(title='Calculation', message='You have {} points!'.format(points))
 
 
 # main
