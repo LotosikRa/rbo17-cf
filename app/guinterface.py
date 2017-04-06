@@ -58,6 +58,8 @@ class DotButton:
     _not_active_background = 'white'
     _active_font = 'white'
     _not_active_font = 'black'
+    _pad = 3
+    _size = 2
 
     def __init__(self, x, y):
         text = '{},{}'.format(x,y)
@@ -66,11 +68,12 @@ class DotButton:
             text=text,
             background=self._not_active_background,
             foreground=self._not_active_font,
-            height=2,
-            width=2,
+            height=self._size,
+            width=self._size,
             command=self._press(text),
         )
-        widget.grid(row=y, column=x, padx=5, pady=5)
+        widget.grid(row=y, column=x,
+                    padx=self._pad, pady=self._pad)
         self.widget = widget
         self.text = text
         self.all.append(self)
