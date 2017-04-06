@@ -1,16 +1,11 @@
 """ This module runs algorithm with CLI. """
-from app import calculate
+from app import calculate, parse_string_to_array
 from settings import CHECKERS, COLUMNS, ROWS, GOAL
 
 
+# helpers
 def get_user_input():
-    """
-    Example of input values:
-    1. 15
-    2. 15
-    3. 12
-    4. 4
-    5. 0,0 0,9 4,0 4,3 4,6 4,9 8,0 8,3 8,6 8,9 12,0 12,9
+    """ See examples in `app/examples.py`
     :return: tuple with arguments for `calculate`
     """
     print("""This is how coordinates looks like:
@@ -36,14 +31,7 @@ def get_user_input():
         for item in [cols, rows, total, goal]:
             item = int(item)
             assert item > 0
-        array = []
-        strs_array = string.split(' ')
-        for pair in strs_array:
-            x, y = pair.split(',')
-            x, y = int(x), int(y)
-            assert x >= 0
-            assert y >= 0
-            array.append((x, y))
+        array = parse_string_to_array(string)
         indata = array, goal, cols, rows, total
         print('You have entered (in order)..: {}'.format(str(indata[1:])))
         print('Entered checkers: {}'.format(str(indata[0])))
@@ -53,6 +41,7 @@ def get_user_input():
         print('Check enter values.')
 
 
+# main
 def main():
     print('Hello World!')
     while input('Press `Y` to continue: ') in ['Y', '']:
