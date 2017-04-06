@@ -40,6 +40,9 @@ class Dot:
             self.dots.append(self)
             return True
 
+    def __repr__(self):
+        return '< Dot x:{} y:{} >'.format(self.x, self.y)
+
 
 class Hand:
     """ Represents connections between Dots (e.g. lines between checkers). """
@@ -50,8 +53,8 @@ class Hand:
 
     @staticmethod
     def calculate_vector(dot1: Dot, dot2: Dot):
-        x = abs(dot1.x - dot2.x)
-        y = abs(dot1.y - dot2.y)
+        x = dot1.x - dot2.x
+        y = dot1.y - dot2.y
         if 0 in [x, y]:
             return x, y
         gcd = greatest_common_divisor(max(x,y), min(x, y))
@@ -61,7 +64,11 @@ class Hand:
         return id(self).__hash__()
 
     def __eq__(self, other):
-        return self.x == other.x and self.y == other.y
+        return (self.x == other.x and self.y == other.y) or \
+               (self.x == -other.x and self.y == -other.y)
+
+    def __repr__(self):
+        return '< Hand x:{} y:{} >'.format(self.x, self.y)
 
     def register(self):
         for item in self.hands:
@@ -115,6 +122,9 @@ class Chain:
         else:
             self.chains.append(self)
             return self
+
+    def __repr__(self):
+        return '< Chain [Hand: {}, Dots: {}] >'.format(self.hand, self.dots)
 
 
 # steps
