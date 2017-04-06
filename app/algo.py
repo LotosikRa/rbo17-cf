@@ -5,13 +5,12 @@ from settings import ROWS, COLUMNS, CHECKERS, GOAL
 # helpers
 def greatest_common_divisor(a, b):
     """ Euclid's algorithm """
-    #if a == 0: return b
-    #else: return a
     while b:
         a, b = b, a % b
     return a
 
 
+# classes
 class Dot:
     """ Represents dots on the xOy (e.g. checkers on the field). """
     dots = []
@@ -129,12 +128,6 @@ class Chain:
 
 
 # steps
-def clear():
-    Dot.dots = []
-    Hand.hads = []
-    Chain.chains = []
-
-
 def init_dots(array: list):
     for x, y in array:
         Dot(x, y).register()
@@ -153,6 +146,12 @@ def search_goals(goal):
     return points
 
 
+def clear():
+    Dot.dots = []
+    Hand.hads = []
+    Chain.chains = []
+
+
 # main function
 def calculate(input_array, goal=GOAL, x_long=COLUMNS, y_long=ROWS, total_dots=CHECKERS):
     """
@@ -163,8 +162,8 @@ def calculate(input_array, goal=GOAL, x_long=COLUMNS, y_long=ROWS, total_dots=CH
     :param goal: minimum of checkers on the one line
     :return: points
     """
-    clear()
     init_dots(input_array)
     init_hands()
     points = search_goals(goal)
+    clear()
     return points
