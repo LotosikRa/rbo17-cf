@@ -3,3 +3,6 @@
 
 # PyCode
 *.pyc
+
+# logs
+*.log
