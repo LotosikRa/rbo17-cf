@@ -12,14 +12,11 @@ class Field:
     _rows = s.ROWS
     _checkers = s.CHECKERS
     _goal = s.GOAL
-    # graphics
-    _active_background = 'black'
-    _not_active_background = 'white'
-    _active_font = 'white'
-    _not_active_font = 'black'
 
     def __init__(self, frame):
         self.frame = frame
+        DotButton.frame = frame
+        DotButton.field = self
         # define attributes
         self.goal = None
         self.checkers = None
@@ -28,8 +25,6 @@ class Field:
         self.checkers_left = None
         self.points = None
         self.checkers_used_list = []
-        self._widgets_list = []
-        self.widgets_map = {}
 
     def draw(self, **kwargs):
         self.goal = kwargs.get('goal', self._goal)
@@ -39,52 +34,59 @@ class Field:
         # draw widgets
         for y in range(self.rows):
             for x in range(self.columns):
-                text = '{},{}'.format(x,y)
-                widget = Button(
-                    self.frame,
-                    text=text,
-                    background=self._not_active_background,
-                    foreground=self._not_active_font,
-                    height=2,
-                    width=2,
-                    command=self._press(text),
-                )
-                widget.grid(row=y, column=x, padx=5, pady=5)
-                self._register_widget(widget)
+                DotButton(x, y)
 
-    def _register_widget(self, widget):
-        self._widgets_list.append(widget)
+    def clear(self):
+        for widget in DotButton.widgets_map.values():
+            widget.grid_forget()
+            del widget
+
+    def get_input(self):
+        output = self.checkers_used_list.copy()
+        self.checkers_used_list = []
+        return output
+
+
+class DotButton:
+    widgets_map = {}
+    frame = None
+    field = None
+    # graphics
+    _active_background = 'black'
+    _not_active_background = 'white'
+    _active_font = 'white'
+    _not_active_font = 'black'
+
+    def __init__(self, x, y):
+        text = '{},{}'.format(x,y)
+        widget = Button(
+            self.frame,
+            text=text,
+            background=self._not_active_background,
+            foreground=self._not_active_font,
+            height=2,
+            width=2,
+            command=self._press(text),
+        )
+        widget.grid(row=y, column=x, padx=5, pady=5)
         self.widgets_map[widget['text']] = widget
-
-    def _remove_widget(self, widget):
-        widget.grid_forget()
-        self.widgets_map.pop(widget['text'])
-        del widget
+        self.widget = widget
 
     def _press(self, text):
         x, y = text.split(',')
         x, y = int(x), int(y)
         def command():
             try:
-                index = self.checkers_used_list.index((x, y))
+                index = self.field.checkers_used_list.index((x, y))
             except ValueError:
-                self.checkers_used_list.append((x, y))
+                self.field.checkers_used_list.append((x, y))
                 self.widgets_map[text]['background'] = self._active_background
                 self.widgets_map[text]['foreground'] = self._active_font
             else:
-                self.checkers_used_list.pop(index)
+                self.field.checkers_used_list.pop(index)
                 self.widgets_map[text]['background'] = self._not_active_background
                 self.widgets_map[text]['foreground'] = self._not_active_font
         return command
-
-    def clear(self):
-        for widget in self._widgets_list:
-            self._remove_widget(widget)
-
-    def get_input(self):
-        output = self.checkers_used_list.copy()
-        self.checkers_used_list = []
-        return output
 
 
 # main Application
