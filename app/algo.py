@@ -5,6 +5,8 @@ from settings import ROWS, COLUMNS, CHECKERS, GOAL
 # helpers
 def greatest_common_divisor(a, b):
     """ Euclid's algorithm """
+    #if a == 0: return b
+    #else: return a
     while b:
         a, b = b, a % b
     return a
@@ -56,8 +58,6 @@ class Hand:
     def calculate_vector(dot1: Dot, dot2: Dot):
         x = dot1.x - dot2.x
         y = dot1.y - dot2.y
-        if 0 in [x, y]:
-            return x, y
         gcd = greatest_common_divisor(max(x,y), min(x, y))
         return int(x/gcd), int(y/gcd)
 
