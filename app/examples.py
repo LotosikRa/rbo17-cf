@@ -57,10 +57,22 @@ sample_checkers2 = [(1, 0),
 . . . .
   . .
 """
+sample_checkers3 = [(0, 0),
+                    (2, 0),
+                    (4, 0),
+                    (6, 0),
+                    (2, 2),
+                    (4, 2),
+                    (6, 2),
+                    (2, 4),
+                    (4, 4),
+                    (6, 4),
+                    (0, 6),
+                    (6, 6),]
 
 
 if __name__ == '__main__':
-    for e in [sample_checkers1, sample_checkers2]:
+    for e in [sample_checkers1, sample_checkers2, sample_checkers3]:
         print('\tStart:')
         for i in range(len(e)):
             print(get_array(e)[i])
