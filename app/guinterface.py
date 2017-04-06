@@ -34,9 +34,15 @@ class Field:
                 DotButton(x, y)
 
     def clear(self):
-        for widget in DotButton.widgets_map.values():
-            widget.grid_forget()
-            del widget
+        for item in DotButton.all:
+            item.widget.grid_forget()
+            del item.widget
+            del item
+        self.checkers_used_list = []
+
+    def reset(self):
+        for item in DotButton.all:
+            item.deactivate()
         self.checkers_used_list = []
 
     def get_input(self):
@@ -44,7 +50,7 @@ class Field:
 
 
 class DotButton:
-    widgets_map = {}
+    all = []
     frame = None
     field = None
     # graphics
@@ -65,8 +71,9 @@ class DotButton:
             command=self._press(text),
         )
         widget.grid(row=y, column=x, padx=5, pady=5)
-        self.widgets_map[widget['text']] = widget
         self.widget = widget
+        self.text = text
+        self.all.append(self)
 
     def _press(self, text):
         x, y = text.split(',')
@@ -76,13 +83,19 @@ class DotButton:
                 index = self.field.checkers_used_list.index((x, y))
             except ValueError:
                 self.field.checkers_used_list.append((x, y))
-                self.widgets_map[text]['background'] = self._active_background
-                self.widgets_map[text]['foreground'] = self._active_font
+                self.activate()
             else:
                 self.field.checkers_used_list.pop(index)
-                self.widgets_map[text]['background'] = self._not_active_background
-                self.widgets_map[text]['foreground'] = self._not_active_font
+                self.deactivate()
         return command
+
+    def activate(self):
+        self.widget['background'] = self._active_background
+        self.widget['foreground'] = self._active_font
+
+    def deactivate(self):
+        self.widget['background'] = self._not_active_background
+        self.widget['foreground'] = self._not_active_font
 
 
 # main Application
@@ -111,16 +124,19 @@ class GUI:
         quit_button = Button(text='QUIT', fg='red', command=quit)
         draw_button = Button(text='Draw', command=self.draw_field)
         clear_button = Button(text='Clear', command=self.clear_field)
+        reset_button = Button(text='Reset', command=self.reset_field)
         calculate_button = Button(text='Calculate', command=self.calculate)
         # pack
         quit_button.pack(side=TOP)
         draw_button.pack(side=TOP)
         clear_button.pack(side=TOP)
-        calculate_button.pack(side=TOP)
+        reset_button.pack(side=TOP)
+        calculate_button.pack(side=BOTTOM)
         # bind
         frame.quit = quit_button
         frame.draw = draw_button
         frame.clear = clear_button
+        frame.reset = reset_button
         frame.calculate = calculate_button
 
     def _define_field(self):
@@ -131,6 +147,9 @@ class GUI:
 
     def clear_field(self):
         self.field.clear()
+
+    def reset_field(self):
+        self.field.reset()
 
     def calculate(self):
         if not self.goal:
