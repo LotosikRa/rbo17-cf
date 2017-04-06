@@ -41,7 +41,7 @@ class Dot:
             return True
 
     def __repr__(self):
-        return '< Dot x:{} y:{} >'.format(self.x, self.y)
+        return '<Dot x:{} y:{}>'.format(self.x, self.y)
 
 
 class Hand:
@@ -68,7 +68,7 @@ class Hand:
                (self.x == -other.x and self.y == -other.y)
 
     def __repr__(self):
-        return '< Hand x:{} y:{} >'.format(self.x, self.y)
+        return '<Hand x:{} y:{}>'.format(self.x, self.y)
 
     def register(self):
         for item in self.hands:
@@ -124,7 +124,7 @@ class Chain:
             return self
 
     def __repr__(self):
-        return '< Chain [Hand: {}, Dots: {}] >'.format(self.hand, self.dots)
+        return '<Chain [Hand: {}, len: {}, first Dot: {}]>'.format(self.hand, self.len, self.dots[0])
 
 
 # steps
