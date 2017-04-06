@@ -1,4 +1,5 @@
 """ This module contains algorithms. """
+from settings import ROWS, COLUMNS, CHECKERS, GOAL
 
 
 # helpers
@@ -147,7 +148,7 @@ def search_goals(goal):
 
 
 # main function
-def calculate(x_long, y_long, total_dots, goal, input_array):
+def calculate(input_array, goal=GOAL, x_long=COLUMNS, y_long=ROWS, total_dots=CHECKERS):
     """
     :param input_array: array with `y_long` arrays each one with `x_long` boolean integer (e.g. 0, 1)
     :param x_long: long of side A (x axis)

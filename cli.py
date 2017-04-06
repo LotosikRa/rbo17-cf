@@ -22,10 +22,10 @@ def get_user_input():
     |   |   |
     """)
     if input('Use defaults? (Y, *): ') != 'Y':
+        goal = input('Enter how many checkers must in one line: ')
         cols = input('Enter number of the columns: ')
         rows = input('Enter number of the rows: ')
         total = input('Enter total number of the checkers: ')
-        goal = input('Enter how many checkers must in one line: ')
     else:
         cols = COLUMNS
         total = CHECKERS
@@ -44,8 +44,9 @@ def get_user_input():
             assert x >= 0
             assert y >= 0
             array.append((x, y))
-        indata = cols, rows, total, goal, array
-        print('You have entered (in this order)..: {}'.format(str(indata)))
+        indata = array, goal, cols, rows, total
+        print('You have entered (in order)..: {}'.format(str(indata[1:])))
+        print('Entered checkers: {}'.format(str(indata[0])))
         return indata
     except Exception as e:
         print(e)
