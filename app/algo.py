@@ -129,6 +129,12 @@ class Chain:
 
 
 # steps
+def clear():
+    Dot.dots = []
+    Hand.hads = []
+    Chain.chains = []
+
+
 def init_dots(array: list):
     for x, y in array:
         Dot(x, y).register()
@@ -157,6 +163,7 @@ def calculate(input_array, goal=GOAL, x_long=COLUMNS, y_long=ROWS, total_dots=CH
     :param goal: minimum of checkers on the one line
     :return: points
     """
+    clear()
     init_dots(input_array)
     init_hands()
     points = search_goals(goal)
