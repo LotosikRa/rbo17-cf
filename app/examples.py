@@ -43,12 +43,24 @@ sample_checkers3 = '0,0 1,0 2,0 3,0 1,1 2,1 3,1 1,2 2,2 3,2 0,3 3,3'
   . . .
 .     .
 """
+sample_checkers4 = '0,0 1,0 2,0 3,0 4,0 0,1 1,1 3,1 4,1 0,2 2,2 4,2' \
+                   ' 0,3 1,3 3,3 4,3 0,4 1,4 2,4 3,4 4,4'
+""" 10
+. . . . .
+. .   . .
+.   .   .
+. .   . .
+. . . . .
+"""
 
 
 if __name__ == '__main__':
-    for e in [sample_checkers1, sample_checkers2, sample_checkers3]:
+    for e in [sample_checkers1,
+              sample_checkers2,
+              sample_checkers3,
+              sample_checkers4,]:
         print('\tStart:')
-        array = parse_string_to_array(e)
+        array = get_array(parse_string_to_array(e))
         for i in range(len(array)):
-            print(get_array(array)[i])
+            print(array[i])
         print('\t:End')
