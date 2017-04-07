@@ -43,6 +43,8 @@ class Field:
 class Menu:
     """ Represents Menu Frame. """
 
+    _width = 10
+
     def __init__(self, app, frame):
         self.app = app
         self.frame = frame
@@ -50,11 +52,21 @@ class Menu:
 
     def draw(self):
         # init
-        quit_button = tk.Button(text='QUIT', fg='red', command=quit)
-        draw_button = tk.Button(text='Draw', command=self.draw_field)
-        clear_button = tk.Button(text='Clear', command=self.clear_field)
-        reset_button = tk.Button(text='Reset', command=self.reset_field)
-        calculate_button = tk.Button(text='Calculate', command=self.calculate)
+        quit_button = tk.Button(text='QUIT', fg='red',
+                                command=quit,
+                                width=self._width)
+        draw_button = tk.Button(text='Draw',
+                                command=self.draw_field,
+                                width=self._width)
+        clear_button = tk.Button(text='Clear',
+                                 command=self.clear_field,
+                                 width=self._width)
+        reset_button = tk.Button(text='Reset',
+                                 command=self.reset_field,
+                                 width=self._width)
+        calculate_button = tk.Button(text='Calculate',
+                                     command=self.calculate,
+                                     height=10, width=self._width)
         # pack
         quit_button.pack(side=tk.TOP)
         draw_button.pack(side=tk.TOP)
@@ -120,26 +132,21 @@ class DotButton:
         x, y = text.split(',')
         x, y = int(x), int(y)
         def command():
-            try:
-                index = self.app.checkers_used_list.index((x, y))
-            except ValueError:
-                if self.app.can_put_new():
-                    self.field.app.checkers_used_list.append((x, y))
-                    self.activate()
-            else:
-                self.field.app.checkers_used_list.pop(index)
+            if self.app.is_used(x, y):
+                self.app.remove(x, y)
                 self.deactivate()
+            elif self.app.can_put():
+                self.app.put(x, y)
+                self.activate()
         return command
 
     def activate(self):
         self.widget['background'] = self._active_background
         self.widget['foreground'] = self._active_font
-        self.app.checkers_left -= 1
 
     def deactivate(self):
         self.widget['background'] = self._not_active_background
         self.widget['foreground'] = self._not_active_font
-        self.app.checkers_left += 1
 
 
 # main Application
@@ -175,12 +182,26 @@ class GUI:
     def show_points(points):
         tkmb.showinfo(title='Calculation', message='You have {} points!'.format(points))
 
-    def can_put_new(self):
+    def can_put(self):
         if len(self.checkers_used_list) < self.checkers:
             return True
         else:
             tkmb.showwarning(title='Rules Warning',
                              message='You cannot use more than {} checkers.'.format(self.checkers))
+
+    def put(self, x, y):
+        self.checkers_used_list.append((x, y))
+
+    def remove(self, x, y):
+        self.checkers_used_list.remove((x, y))
+
+    def is_used(self, x, y):
+        try:
+            index = self.checkers_used_list.index((x, y))
+        except ValueError:
+            return False
+        else:
+            return True
 
 
 # main
