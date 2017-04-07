@@ -1,5 +1,5 @@
 """ This module contains all GUI needs. """
-from tkinter import *
+import tkinter as tk
 from tkinter import messagebox as tkmb
 import settings as s
 import app.algo as a
@@ -8,31 +8,23 @@ import app.algo as a
 class Field:
     """ Represents Checkers field. """
 
-    # store defaults
-    _columns = s.COLUMNS
-    _rows = s.ROWS
-    _checkers = s.CHECKERS
     # graphics
     _background = 'grey70'
 
-    def __init__(self, frame):
+    def __init__(self, app, frame):
+        self.app = app
         self.frame = frame
         DotButton.frame = frame
         DotButton.field = self
-        # define attributes
-        self.checkers = None
-        self.rows = None
-        self.columns = None
-        self.checkers_left = None
-        self.points = None
+
         self.checkers_used_list = []
         # configure frame
         self.frame.configure(background=self._background)
 
     def draw(self, **kwargs):
-        self.checkers = kwargs.get('checkers', self._checkers)
-        self.rows = kwargs.get('rows', self._rows)
-        self.columns = kwargs.get('columns', self._columns)
+        self.checkers = kwargs.get('checkers', self.app._checkers)
+        self.rows = kwargs.get('rows', self.app._rows)
+        self.columns = kwargs.get('columns', self.app._columns)
         # draw widgets
         for y in range(self.rows):
             for x in range(self.columns):
@@ -55,6 +47,50 @@ class Field:
         return self.checkers_used_list
 
 
+class Menu:
+    """ Represents Menu Frame. """
+
+    def __init__(self, app, frame):
+        self.app = app
+        self.frame = frame
+        self.draw()
+
+    def draw(self):
+        # init
+        quit_button = tk.Button(text='QUIT', fg='red', command=quit)
+        draw_button = tk.Button(text='Draw', command=self.draw_field)
+        clear_button = tk.Button(text='Clear', command=self.clear_field)
+        reset_button = tk.Button(text='Reset', command=self.reset_field)
+        calculate_button = tk.Button(text='Calculate', command=self.calculate)
+        # pack
+        quit_button.pack(side=tk.TOP)
+        draw_button.pack(side=tk.TOP)
+        clear_button.pack(side=tk.TOP)
+        reset_button.pack(side=tk.TOP)
+        calculate_button.pack(side=tk.BOTTOM)
+        # bind
+        self.frame.quit = quit_button
+        self.frame.draw = draw_button
+        self.frame.clear = clear_button
+        self.frame.reset = reset_button
+        self.frame.calculate = calculate_button
+
+    def draw_field(self):
+        self.app.field.draw()
+
+    def clear_field(self):
+        self.app.field.clear()
+
+    def reset_field(self):
+        self.app.field.reset()
+
+    def calculate(self):
+        if not self.app.goal:
+            self.app.goal = self.app._goal
+        points = a.calculate(self.app.field.get_input(), self.app.goal)
+        self.app.show_points(points)
+
+
 class DotButton:
     all = []
     frame = None
@@ -72,7 +108,7 @@ class DotButton:
 
     def __init__(self, x, y):
         text = '{},{}'.format(x,y)
-        widget = Button(
+        widget = tk.Button(
             self.frame,
             text=text,
             background=self._not_active_background,
@@ -114,70 +150,38 @@ class DotButton:
 class GUI:
     """ Represents GUI tkinter application. """
 
+    # store defaults
+    _columns = s.COLUMNS
+    _rows = s.ROWS
+    _checkers = s.CHECKERS
     _goal = s.GOAL
 
     def __init__(self, master):
         self.master = master
-        self._define_frames()
-        self._define_menu()
-        self._define_field()
+
+        self.field_frame = tk.Frame(self.master)
+        self.menu_frame = tk.Frame(self.master)
+        # pack frames
+        self.field_frame.pack(side=tk.LEFT)
+        self.menu_frame.pack(side=tk.RIGHT)
+
+        self.menu = Menu(self, self.menu_frame)
+        self.field = Field(self, self.field_frame)
+
+        # define attributes
+        self.checkers = None
+        self.rows = None
+        self.columns = None
         self.goal = None
+        self.checkers_left = None
 
-    def _define_frames(self):
-        self.field_frame = Frame(self.master)
-        self.menu_frame = Frame(self.master)
-        # pack them
-        self.field_frame.pack(side=LEFT)
-        self.menu_frame.pack(side=RIGHT)
-
-    def _define_menu(self):
-        frame = self.menu_frame
-        # init
-        quit_button = Button(text='QUIT', fg='red', command=quit)
-        draw_button = Button(text='Draw', command=self.draw_field)
-        clear_button = Button(text='Clear', command=self.clear_field)
-        reset_button = Button(text='Reset', command=self.reset_field)
-        calculate_button = Button(text='Calculate', command=self.calculate)
-        # pack
-        quit_button.pack(side=TOP)
-        draw_button.pack(side=TOP)
-        clear_button.pack(side=TOP)
-        reset_button.pack(side=TOP)
-        calculate_button.pack(side=BOTTOM)
-        # bind
-        frame.quit = quit_button
-        frame.draw = draw_button
-        frame.clear = clear_button
-        frame.reset = reset_button
-        frame.calculate = calculate_button
-
-    def _define_field(self):
-        self.field = Field(self.field_frame)
-
-    def draw_field(self):
-        self.field.draw()
-
-    def clear_field(self):
-        self.field.clear()
-
-    def reset_field(self):
-        self.field.reset()
-
-    def calculate(self):
-        if not self.goal:
-            self.goal = self._goal
-        input = self.field.get_input()
-        output = a.calculate(input, self.goal)
-        self.show_points(output)
-        # log it
-        print('{}\n\t{}'.format(input, output))
-
-    def show_points(self, points):
+    @staticmethod
+    def show_points(points):
         tkmb.showinfo(title='Calculation', message='You have {} points!'.format(points))
 
 
 # main
 def launch_gui():
-    root = Tk()
+    root = tk.Tk()
     app = GUI(root)
     root.mainloop()
