@@ -14,21 +14,17 @@ class Field:
     def __init__(self, app, frame):
         self.app = app
         self.frame = frame
-        DotButton.frame = frame
-        DotButton.field = self
-
-        self.checkers_used_list = []
         # configure frame
         self.frame.configure(background=self._background)
 
     def draw(self, **kwargs):
-        self.checkers = kwargs.get('checkers', self.app._checkers)
-        self.rows = kwargs.get('rows', self.app._rows)
-        self.columns = kwargs.get('columns', self.app._columns)
+        self.app.checkers = kwargs.get('checkers', self.app._checkers)
+        self.app.rows = kwargs.get('rows', self.app._rows)
+        self.app.columns = kwargs.get('columns', self.app._columns)
         # draw widgets
-        for y in range(self.rows):
-            for x in range(self.columns):
-                DotButton(x, y)
+        for y in range(self.app.rows):
+            for x in range(self.app.columns):
+                DotButton(self.app, self, x, y)
 
     def clear(self):
         for item in DotButton.all:
@@ -36,15 +32,12 @@ class Field:
             del item.widget
             del item
         DotButton.all = []
-        self.checkers_used_list = []
+        self.app.checkers_used_list = []
 
     def reset(self):
         for item in DotButton.all:
             item.deactivate()
-        self.checkers_used_list = []
-
-    def get_input(self):
-        return self.checkers_used_list
+        self.app.checkers_used_list = []
 
 
 class Menu:
@@ -87,14 +80,12 @@ class Menu:
     def calculate(self):
         if not self.app.goal:
             self.app.goal = self.app._goal
-        points = a.calculate(self.app.field.get_input(), self.app.goal)
+        points = a.calculate(self.app.checkers_used_list, self.app.goal)
         self.app.show_points(points)
 
 
 class DotButton:
     all = []
-    frame = None
-    field = None
     # graphics
     _active_background = 'black'
     _active_font = 'white'
@@ -106,10 +97,12 @@ class DotButton:
     _height = s.HEIGHT
     _width = s.WIDTH
 
-    def __init__(self, x, y):
+    def __init__(self, app, field, x, y):
+        self.app = app
+        self.field = field
         text = '{},{}'.format(x,y)
         widget = tk.Button(
-            self.frame,
+            self.field.frame,
             text=text,
             background=self._not_active_background,
             foreground=self._not_active_font,
@@ -128,22 +121,25 @@ class DotButton:
         x, y = int(x), int(y)
         def command():
             try:
-                index = self.field.checkers_used_list.index((x, y))
+                index = self.app.checkers_used_list.index((x, y))
             except ValueError:
-                self.field.checkers_used_list.append((x, y))
-                self.activate()
+                if self.app.can_put_new():
+                    self.field.app.checkers_used_list.append((x, y))
+                    self.activate()
             else:
-                self.field.checkers_used_list.pop(index)
+                self.field.app.checkers_used_list.pop(index)
                 self.deactivate()
         return command
 
     def activate(self):
         self.widget['background'] = self._active_background
         self.widget['foreground'] = self._active_font
+        self.app.checkers_left -= 1
 
     def deactivate(self):
         self.widget['background'] = self._not_active_background
         self.widget['foreground'] = self._not_active_font
+        self.app.checkers_left += 1
 
 
 # main Application
@@ -173,11 +169,18 @@ class GUI:
         self.rows = None
         self.columns = None
         self.goal = None
-        self.checkers_left = None
+        self.checkers_used_list = []
 
     @staticmethod
     def show_points(points):
         tkmb.showinfo(title='Calculation', message='You have {} points!'.format(points))
+
+    def can_put_new(self):
+        if len(self.checkers_used_list) < self.checkers:
+            return True
+        else:
+            tkmb.showwarning(title='Rules Warning',
+                             message='You cannot use more than {} checkers.'.format(self.checkers))
 
 
 # main
