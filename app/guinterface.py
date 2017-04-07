@@ -39,6 +39,7 @@ class Field:
             item.widget.grid_forget()
             del item.widget
             del item
+        DotButton.all = []
         self.checkers_used_list = []
 
     def reset(self):
