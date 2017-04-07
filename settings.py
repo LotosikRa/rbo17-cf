@@ -10,14 +10,20 @@ GOAL = 4
 ALGO_LOGFILE = 'algo.log'
 
 # Design
+FIELD_BACKGROUND = 'grey'
 COORDINATES = False
 MENU_WIDTH = 15
-QUIT_BG = 'gold'
-QUIT_FG = 'red'
+MENU_BACKGROUND = 'red'
+QUIT_BG = 'white'
+QUIT_FG = 'gold'
+QUIT_HEIGHT = 3
+QUIT_PADY = 10
 CALCULATE_BG = 'green3'
 CALCULATE_HIGHT = 10
 RESET_BG = 'yellow2'
-HEIGHT = 1
-WIDTH = 1
+DRAW_CLEAR_BG = 'CadetBlue1'
+DB_HEIGHT = 1
+DB_WIDTH = 1
+DB_PAD = 3
 if sys.platform == 'win32':
-    WIDTH *= 2
+    DB_WIDTH *= 2

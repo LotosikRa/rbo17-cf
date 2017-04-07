@@ -9,7 +9,7 @@ class Field:
     """ Represents Checkers field. """
 
     # graphics
-    _background = 'grey70'
+    _background = s.FIELD_BACKGROUND
 
     def __init__(self, app, frame):
         self.app = app
@@ -48,18 +48,23 @@ class Field:
 class Menu:
     """ Represents Menu Frame. """
 
+    _background = s.MENU_BACKGROUND
     _width = s.MENU_WIDTH
     _quit_fg = s.QUIT_FG
     _quit_bg = s.QUIT_BG
+    _quit_height = s.QUIT_HEIGHT
+    _quit_pady = s.QUIT_PADY
     _calculate_height = s.CALCULATE_HIGHT
     _calculate_bg = s.CALCULATE_BG
     _reset_bg = s.RESET_BG
+    _draw_reset_bg = s.DRAW_CLEAR_BG
 
     def __init__(self, app, frame):
         self.app = app
         self.frame = frame
         self.define_variables()
         # draw
+        self.frame.configure(background=self._background)
         self.draw()
 
     def define_variables(self):
@@ -79,14 +84,17 @@ class Menu:
         # init
         quit_button = tk.Button(text='QUIT',
                                 command=quit,
-                                width=self._width,
-                                fg=self._quit_fg, bg=self._quit_bg)
+                                width=self._width, height=self._quit_height,
+                                fg=self._quit_fg, bg=self._quit_bg,
+                                pady=self._quit_pady,)
         draw_button = tk.Button(text='Draw',
                                 command=self.draw_field,
-                                width=self._width)
+                                width=self._width,
+                                bg=self._draw_reset_bg)
         clear_button = tk.Button(text='Clear',
                                  command=self.clear_field,
-                                 width=self._width)
+                                 width=self._width,
+                                 bg=self._draw_reset_bg)
         reset_button = tk.Button(text='Reset',
                                  command=self.reset_field,
                                  width=self._width,
@@ -176,9 +184,9 @@ class DotButton:
     _not_active_background = 'white'
     _not_active_font = 'black'
 
-    _pad = 3
-    _height = s.HEIGHT
-    _width = s.WIDTH
+    _pad = s.DB_PAD
+    _height = s.DB_HEIGHT
+    _width = s.DB_WIDTH
 
     def __init__(self, app, field, x, y):
         self.app = app
