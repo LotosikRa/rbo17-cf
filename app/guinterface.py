@@ -48,7 +48,20 @@ class Menu:
     def __init__(self, app, frame):
         self.app = app
         self.frame = frame
+        self.define_variables()
+        # draw
         self.draw()
+
+    def define_variables(self):
+        self.columns_var = tk.IntVar()
+        self.rows_var = tk.IntVar()
+        self.checkers_var = tk.IntVar()
+        self.goal_var = tk.IntVar()
+        # set defaults
+        self.columns_var.set(self.app._columns)
+        self.rows_var.set(self.app._rows)
+        self.checkers_var.set(self.app._checkers)
+        self.goal_var.set(self.app._goal)
 
     def draw(self):
         # init
@@ -67,21 +80,58 @@ class Menu:
         calculate_button = tk.Button(text='Calculate',
                                      command=self.calculate,
                                      height=10, width=self._width)
+        columns_label = tk.Label(text='Columns:',
+                                 width=self._width)
+        columns_entry = tk.Entry(textvariable=self.columns_var,
+                                 width=self._width)
+        rows_label = tk.Label(text='Rows:',
+                              width=self._width)
+        rows_entry = tk.Entry(textvariable=self.rows_var,
+                              width=self._width,)
+        checkers_label = tk.Label(text='Checkers:',
+                                  width=self._width)
+        checkers_entry = tk.Entry(textvariable=self.checkers_var,
+                                  width=self._width,)
+        goal_label = tk.Label(text='Goal:',
+                              width=self._width)
+        goal_entry = tk.Entry(textvariable=self.goal_var,
+                              width=self._width,)
         # pack
         quit_button.pack(side=tk.TOP)
         draw_button.pack(side=tk.TOP)
         clear_button.pack(side=tk.TOP)
         reset_button.pack(side=tk.TOP)
+        columns_label.pack()
+        columns_entry.pack()
+        rows_label.pack()
+        rows_entry.pack()
+        checkers_label.pack()
+        checkers_entry.pack()
+        goal_label.pack()
+        goal_entry.pack()
         calculate_button.pack(side=tk.BOTTOM)
         # bind
         self.frame.quit = quit_button
         self.frame.draw = draw_button
         self.frame.clear = clear_button
         self.frame.reset = reset_button
+        self.frame.columns_label = columns_label
+        self.frame.columns_entry = columns_entry
+        self.frame.rows_label = rows_label
+        self.frame.rows_entry = rows_entry
+        self.frame.checkers_label = checkers_label
+        self.frame.checkers_entry = checkers_entry
+        self.frame.goal_label = goal_label
+        self.frame.goal_entry = goal_entry
         self.frame.calculate = calculate_button
 
     def draw_field(self):
-        self.app.field.draw()
+        self.app.field.draw(
+            columns=self.columns_var.get(),
+            rows=self.rows_var.get(),
+            checkers=self.checkers_var.get(),
+        )
+        self.app.goal = self.goal_var.get()
 
     def clear_field(self):
         self.app.field.clear()
@@ -90,8 +140,6 @@ class Menu:
         self.app.field.reset()
 
     def calculate(self):
-        if not self.app.goal:
-            self.app.goal = self.app._goal
         points = a.calculate(self.app.checkers_used_list, self.app.goal)
         self.app.show_points(points)
 
