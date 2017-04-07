@@ -48,7 +48,12 @@ class Field:
 class Menu:
     """ Represents Menu Frame. """
 
-    _width = 10
+    _width = s.MENU_WIDTH
+    _quit_fg = s.QUIT_FG
+    _quit_bg = s.QUIT_BG
+    _calculate_height = s.CALCULATE_HIGHT
+    _calculate_bg = s.CALCULATE_BG
+    _reset_bg = s.RESET_BG
 
     def __init__(self, app, frame):
         self.app = app
@@ -72,9 +77,10 @@ class Menu:
 
     def draw(self):
         # init
-        quit_button = tk.Button(text='QUIT', fg='red',
+        quit_button = tk.Button(text='QUIT',
                                 command=quit,
-                                width=self._width)
+                                width=self._width,
+                                fg=self._quit_fg, bg=self._quit_bg)
         draw_button = tk.Button(text='Draw',
                                 command=self.draw_field,
                                 width=self._width)
@@ -83,10 +89,13 @@ class Menu:
                                  width=self._width)
         reset_button = tk.Button(text='Reset',
                                  command=self.reset_field,
-                                 width=self._width)
+                                 width=self._width,
+                                 bg=self._reset_bg,)
         calculate_button = tk.Button(text='Calculate',
                                      command=self.calculate,
-                                     height=10, width=self._width)
+                                     height=self._calculate_height,
+                                     width=self._width,
+                                     bg=self._calculate_bg)
         columns_label = tk.Label(text='Columns:',
                                  width=self._width)
         columns_entry = tk.Entry(textvariable=self.columns_var,
@@ -103,7 +112,7 @@ class Menu:
                               width=self._width)
         goal_entry = tk.Entry(textvariable=self.goal_var,
                               width=self._width,)
-        coordinates_check = tk.Checkbutton(text='Coordinates?',
+        coordinates_check = tk.Checkbutton(text='Show coordinates?',
                                            width=self._width,
                                            variable=self.coordinates_var,
                                            onvalue=True, offvalue=False,)
@@ -111,7 +120,6 @@ class Menu:
         quit_button.pack(side=tk.TOP)
         draw_button.pack(side=tk.TOP)
         clear_button.pack(side=tk.TOP)
-        reset_button.pack(side=tk.TOP)
         columns_label.pack()
         columns_entry.pack()
         rows_label.pack()
@@ -122,6 +130,7 @@ class Menu:
         goal_entry.pack()
         coordinates_check.pack()
         calculate_button.pack(side=tk.BOTTOM)
+        reset_button.pack(side=tk.BOTTOM)
         # bind
         self.frame.quit = quit_button
         self.frame.draw = draw_button
@@ -210,7 +219,7 @@ class DotButton:
 
 
 # main Application
-class GUI:
+class App:
     """ Represents GUI tkinter application. """
 
     # store defaults
@@ -269,5 +278,5 @@ class GUI:
 # main
 def launch_gui():
     root = tk.Tk()
-    app = GUI(root)
+    app = App(root)
     root.mainloop()
