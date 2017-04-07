@@ -12,6 +12,8 @@ class Field:
     _columns = s.COLUMNS
     _rows = s.ROWS
     _checkers = s.CHECKERS
+    # graphics
+    _background = 'grey70'
 
     def __init__(self, frame):
         self.frame = frame
@@ -24,6 +26,8 @@ class Field:
         self.checkers_left = None
         self.points = None
         self.checkers_used_list = []
+        # configure frame
+        self.frame.configure(background=self._background)
 
     def draw(self, **kwargs):
         self.checkers = kwargs.get('checkers', self._checkers)
@@ -57,11 +61,14 @@ class DotButton:
     field = None
     # graphics
     _active_background = 'black'
-    _not_active_background = 'white'
     _active_font = 'white'
+
+    _not_active_background = 'white'
     _not_active_font = 'black'
+
     _pad = 3
-    _size = 2
+    _height = s.HEIGHT
+    _width = s.WIDTH
 
     def __init__(self, x, y):
         text = '{},{}'.format(x,y)
@@ -70,8 +77,8 @@ class DotButton:
             text=text,
             background=self._not_active_background,
             foreground=self._not_active_font,
-            height=self._size,
-            width=self._size,
+            height=self._height,
+            width=self._width,
             command=self._press(text),
         )
         widget.grid(row=y, column=x,
