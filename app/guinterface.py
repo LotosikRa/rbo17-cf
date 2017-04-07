@@ -14,10 +14,13 @@ class Field:
     def __init__(self, app, frame):
         self.app = app
         self.frame = frame
+        self.visible = False
         # configure frame
         self.frame.configure(background=self._background)
 
     def draw(self, **kwargs):
+        if self.visible:
+            self.clear()
         self.app.checkers = kwargs.get('checkers', self.app._checkers)
         self.app.rows = kwargs.get('rows', self.app._rows)
         self.app.columns = kwargs.get('columns', self.app._columns)
@@ -25,6 +28,7 @@ class Field:
         for y in range(self.app.rows):
             for x in range(self.app.columns):
                 DotButton(self.app, self, x, y)
+        self.visible = True
 
     def clear(self):
         for item in DotButton.all:
@@ -33,6 +37,7 @@ class Field:
             del item
         DotButton.all = []
         self.app.checkers_used_list = []
+        self.visible = False
 
     def reset(self):
         for item in DotButton.all:
@@ -57,11 +62,13 @@ class Menu:
         self.rows_var = tk.IntVar()
         self.checkers_var = tk.IntVar()
         self.goal_var = tk.IntVar()
+        self.coordinates_var = tk.BooleanVar()
         # set defaults
         self.columns_var.set(self.app._columns)
         self.rows_var.set(self.app._rows)
         self.checkers_var.set(self.app._checkers)
         self.goal_var.set(self.app._goal)
+        self.coordinates_var.set(self.app._coordinates)
 
     def draw(self):
         # init
@@ -96,6 +103,10 @@ class Menu:
                               width=self._width)
         goal_entry = tk.Entry(textvariable=self.goal_var,
                               width=self._width,)
+        coordinates_check = tk.Checkbutton(text='Coordinates?',
+                                           width=self._width,
+                                           variable=self.coordinates_var,
+                                           onvalue=True, offvalue=False,)
         # pack
         quit_button.pack(side=tk.TOP)
         draw_button.pack(side=tk.TOP)
@@ -109,6 +120,7 @@ class Menu:
         checkers_entry.pack()
         goal_label.pack()
         goal_entry.pack()
+        coordinates_check.pack()
         calculate_button.pack(side=tk.BOTTOM)
         # bind
         self.frame.quit = quit_button
@@ -123,9 +135,11 @@ class Menu:
         self.frame.checkers_entry = checkers_entry
         self.frame.goal_label = goal_label
         self.frame.goal_entry = goal_entry
+        self.frame.coordinates_check = coordinates_check
         self.frame.calculate = calculate_button
 
     def draw_field(self):
+        self.app.coordinates = self.coordinates_var.get()
         self.app.field.draw(
             columns=self.columns_var.get(),
             rows=self.rows_var.get(),
@@ -160,25 +174,23 @@ class DotButton:
     def __init__(self, app, field, x, y):
         self.app = app
         self.field = field
-        text = '{},{}'.format(x,y)
         widget = tk.Button(
             self.field.frame,
-            text=text,
             background=self._not_active_background,
             foreground=self._not_active_font,
             height=self._height,
             width=self._width,
-            command=self._press(text),
+            command=self._press(x, y),
         )
+        if self.app.coordinates:
+            widget.configure(text='{},{}'.format(x,y),
+                             width=self._width*2, height=self._height*2)
         widget.grid(row=y, column=x,
                     padx=self._pad, pady=self._pad)
         self.widget = widget
-        self.text = text
         self.all.append(self)
 
-    def _press(self, text):
-        x, y = text.split(',')
-        x, y = int(x), int(y)
+    def _press(self, x, y):
         def command():
             if self.app.is_used(x, y):
                 self.app.remove(x, y)
@@ -206,6 +218,7 @@ class GUI:
     _rows = s.ROWS
     _checkers = s.CHECKERS
     _goal = s.GOAL
+    _coordinates = s.COORDINATES
 
     def __init__(self, master):
         self.master = master
@@ -224,6 +237,7 @@ class GUI:
         self.rows = None
         self.columns = None
         self.goal = None
+        self.coordinates = None
         self.checkers_used_list = []
 
     @staticmethod

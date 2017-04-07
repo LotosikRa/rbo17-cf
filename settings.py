@@ -10,9 +10,10 @@ GOAL = 4
 ALGO_LOGFILE = 'algo.log'
 
 # Design
+COORDINATES = False
 if sys.platform == 'win32':
-    HEIGHT = 2
-    WIDTH = 4
+    HEIGHT = 1
+    WIDTH = 2
 else:
     HEIGHT = 2
     WIDTH = 2
