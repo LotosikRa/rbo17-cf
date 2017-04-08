@@ -2,9 +2,6 @@ import logging as lg
 from settings import CALC_LOGFILE, TEAM_LOGFILE
 
 
-lg.basicConfig(filename=CALC_LOGFILE,
-               level=lg.INFO,
-               format='%(asctime)s %(levelname)s :: %(message)s')
 # Calculator logger
 calc_lg = lg.getLogger('Calculates')
 calc_lg.setLevel(lg.INFO)
