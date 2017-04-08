@@ -11,7 +11,7 @@ CALC_LOGFILE = 'calc.log'
 TEAM_LOGFILE = 'teams.log'
 
 # Design
-COORDINATES = False
+COORDINATES = True
 
 FIELD_BACKGROUND = 'grey'
 
@@ -23,7 +23,7 @@ QUIT_FG = 'gold'
 QUIT_HEIGHT = 3
 QUIT_PADY = 10
 
-DRAW_CLEAR_BG = 'CadetBlue1'
+DRAW_BG = 'CadetBlue1'
 
 RESET_BG = 'yellow2'
 

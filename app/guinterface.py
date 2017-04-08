@@ -56,7 +56,7 @@ class Menu:
     _quit_bg = s.QUIT_BG
     _quit_height = s.QUIT_HEIGHT
     _quit_pady = s.QUIT_PADY
-    _draw_reset_bg = s.DRAW_CLEAR_BG
+    _draw_bg = s.DRAW_BG
     _reset_bg = s.RESET_BG
     _save_height = s.SAVE_HIGHT
     _save_bg = s.SAVE_BG
@@ -94,11 +94,7 @@ class Menu:
         draw_button = tk.Button(text='Draw',
                                 command=self.draw_field,
                                 width=self._width,
-                                bg=self._draw_reset_bg)
-        clear_button = tk.Button(text='Clear',
-                                 command=self.clear_field,
-                                 width=self._width,
-                                 bg=self._draw_reset_bg)
+                                bg=self._draw_bg)
         reset_button = tk.Button(text='Reset',
                                  command=self.reset_field,
                                  width=self._width,
@@ -135,7 +131,6 @@ class Menu:
         # pack
         quit_button.pack(side=tk.TOP)
         draw_button.pack(side=tk.TOP)
-        clear_button.pack(side=tk.TOP)
         columns_label.pack()
         columns_entry.pack()
         rows_label.pack()
@@ -145,13 +140,9 @@ class Menu:
         goal_label.pack()
         goal_entry.pack()
         coordinates_check.pack()
-        calculate_button.pack(side=tk.BOTTOM)
-        save_button.pack(side=tk.BOTTOM)
-        reset_button.pack(side=tk.BOTTOM)
         # bind
         self.frame.quit = quit_button
         self.frame.draw = draw_button
-        self.frame.clear = clear_button
         self.frame.reset = reset_button
         self.frame.columns_label = columns_label
         self.frame.columns_entry = columns_entry
@@ -173,9 +164,10 @@ class Menu:
             checkers=self.checkers_var.get(),
         )
         self.app.goal = self.goal_var.get()
-
-    def clear_field(self):
-        self.app.field.clear()
+        # Show hidden buttons
+        self.frame.calculate.pack(side=tk.BOTTOM)
+        self.frame.save.pack(side=tk.BOTTOM)
+        self.frame.reset.pack(side=tk.BOTTOM)
 
     def reset_field(self):
         self.app.field.reset()
