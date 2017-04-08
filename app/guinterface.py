@@ -2,8 +2,8 @@
 import tkinter as tk
 from tkinter import messagebox as tkmb
 from tkinter import simpledialog as tksd
+from .algorithm import algo
 import settings as s
-import app.algo as a
 import app.logger as lg
 
 
@@ -298,11 +298,11 @@ class App:
             return True
 
     def calculate(self):
-        points = a.calculate(self.checkers_used_list, self.goal)
+        points = algo.calculate(self.checkers_used_list, self.goal)
         self.show_points(points)
 
     def save(self):
-        points = a.calculate(self.checkers_used_list, self.goal)
+        points = algo.calculate(self.checkers_used_list, self.goal)
         lg.team_lg.info('Team: "{team}" Points: {points} Checkers: {chekers}'.format(
             team=self.save_dialog(),
             points=points,

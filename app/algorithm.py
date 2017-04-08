@@ -1,5 +1,5 @@
 """ This module contains algorithms. """
-from settings import ROWS, COLUMNS, CHECKERS, GOAL
+from settings import GOAL
 from .logger import calc_lg
 
 
@@ -135,45 +135,45 @@ class Chain:
         return '<Chain [Hand: {}, len: {}, first Dot: {}]>'.format(self.hand, self.len, self.dots[0])
 
 
-# steps
-def init_dots(array: list):
-    for x, y in array:
-        Dot(x, y).register()
+class Algorithm:
+
+    def __init__(self):
+        self.Chain = Chain
+        self.Dot = Dot
+        self.Hand = Hand
+
+    def init_dots(self, array: list):
+        for x, y in array:
+            self.Dot(x, y).register()
+
+    def init_hands(self):
+        for dot in self.Dot.dots:
+            dot.build_hands()
+
+    def clear(self):
+        self.Dot.dots = []
+        self.Hand.hads = []
+        self.Chain.chains = []
+        self.Chain.approves = 0
+        self.Chain.goal = 0
+
+    def calculate(self, array, goal=GOAL):
+        try:
+            self.Chain.goal = goal
+            self.init_dots(array)
+            self.init_hands()
+            points = self.get_points()
+        except Exception as e:
+            calc_lg.error(e)
+            points = 'ERROR'
+        else:
+            calc_lg.info('Points - {} ; {}'.format(points, str(array)))
+        finally:
+            self.clear()
+            return points
+
+    def get_points(self):
+        return self.Chain.approves
 
 
-def init_hands():
-    for dot in Dot.dots:
-        dot.build_hands()
-
-
-def clear():
-    Dot.dots = []
-    Hand.hads = []
-    Chain.chains = []
-    Chain.approves = 0
-    Chain.goal = 0
-
-
-# main function
-def calculate(input_array, goal=GOAL, x_long=COLUMNS, y_long=ROWS, total_dots=CHECKERS):
-    """
-    :param input_array: array with `y_long` arrays each one with `x_long` boolean integer (e.g. 0, 1)
-    :param x_long: long of side A (x axis)
-    :param y_long: long of side B (y axis)
-    :param total_dots: number of checkers
-    :param goal: minimum of checkers on the one line
-    :return: points
-    """
-    try:
-        Chain.goal = goal
-        init_dots(input_array)
-        init_hands()
-        points = Chain.approves
-    except Exception as e:
-        calc_lg.error(e)
-        points = 'ERROR'
-    else:
-        calc_lg.info('Points - {} ; {}'.format(points, str(input_array)))
-    finally:
-        clear()
-        return points
+algo = Algorithm()
