@@ -1,6 +1,6 @@
 """ This module contains algorithms. """
 from settings import ROWS, COLUMNS, CHECKERS, GOAL
-from .logger import logging
+from .logger import calc_lg
 
 
 # helpers
@@ -163,9 +163,15 @@ def calculate(input_array, goal=GOAL, x_long=COLUMNS, y_long=ROWS, total_dots=CH
     :param goal: minimum of checkers on the one line
     :return: points
     """
-    init_dots(input_array)
-    init_hands()
-    points = search_goals(goal)
-    clear()
-    logging.info('Points - {} ; {}'.format(points, str(input_array)))
-    return points
+    try:
+        init_dots(input_array)
+        init_hands()
+        points = search_goals(goal)
+    except Exception as e:
+        calc_lg.error(e)
+        points = 'ERROR'
+    else:
+        calc_lg.info('Points - {} ; {}'.format(points, str(input_array)))
+    finally:
+        clear()
+        return points

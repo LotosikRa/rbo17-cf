@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import messagebox as tkmb
 import settings as s
 import app.algo as a
+import app.logger as lg
 
 
 class Field:
@@ -171,8 +172,7 @@ class Menu:
         self.app.field.reset()
 
     def calculate(self):
-        points = a.calculate(self.app.checkers_used_list, self.app.goal)
-        self.app.show_points(points)
+        self.app.calculate()
 
 
 class DotButton:
@@ -261,6 +261,10 @@ class App:
     def show_points(points):
         tkmb.showinfo(title='Calculation', message='You have {} points!'.format(points))
 
+    @staticmethod
+    def safe_dialog():
+        pass
+
     def can_put(self):
         if len(self.checkers_used_list) < self.checkers:
             return True
@@ -281,6 +285,19 @@ class App:
             return False
         else:
             return True
+
+    def calculate(self):
+        points = a.calculate(self.checkers_used_list, self.goal)
+        self.show_points(points)
+
+    def safe(self):
+        points = a.calculate(self.checkers_used_list, self.goal)
+        self.safe_dialog()
+        lg.team_lg.info('Team: "{name}" Points: {points} Checkers: {chekers}'.format(
+            name='NONE',
+            points=points,
+            chekers=self.checkers_used_list,
+        ))
 
 
 # main

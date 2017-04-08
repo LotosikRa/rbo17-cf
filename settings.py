@@ -7,7 +7,8 @@ CHECKERS = 12
 GOAL = 4
 
 # Logging
-ALGO_LOGFILE = 'algo.log'
+CALC_LOGFILE = 'calc.log'
+TEAM_LOGFILE = 'teams.log'
 
 # Design
 FIELD_BACKGROUND = 'grey'
