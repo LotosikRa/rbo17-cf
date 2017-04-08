@@ -1,6 +1,7 @@
 """ This module contains all GUI needs. """
 import tkinter as tk
 from tkinter import messagebox as tkmb
+from tkinter import simpledialog as tksd
 import settings as s
 import app.algo as a
 import app.logger as lg
@@ -55,10 +56,12 @@ class Menu:
     _quit_bg = s.QUIT_BG
     _quit_height = s.QUIT_HEIGHT
     _quit_pady = s.QUIT_PADY
+    _draw_reset_bg = s.DRAW_CLEAR_BG
+    _reset_bg = s.RESET_BG
+    _save_height = s.SAVE_HIGHT
+    _save_bg = s.SAVE_BG
     _calculate_height = s.CALCULATE_HIGHT
     _calculate_bg = s.CALCULATE_BG
-    _reset_bg = s.RESET_BG
-    _draw_reset_bg = s.DRAW_CLEAR_BG
 
     def __init__(self, app, frame):
         self.app = app
@@ -100,6 +103,10 @@ class Menu:
                                  command=self.reset_field,
                                  width=self._width,
                                  bg=self._reset_bg,)
+        save_button = tk.Button(text='Save',
+                                command=self.save,
+                                width=self._width, height=self._save_height,
+                                bg=self._save_bg)
         calculate_button = tk.Button(text='Calculate',
                                      command=self.calculate,
                                      height=self._calculate_height,
@@ -139,6 +146,7 @@ class Menu:
         goal_entry.pack()
         coordinates_check.pack()
         calculate_button.pack(side=tk.BOTTOM)
+        save_button.pack(side=tk.BOTTOM)
         reset_button.pack(side=tk.BOTTOM)
         # bind
         self.frame.quit = quit_button
@@ -155,6 +163,7 @@ class Menu:
         self.frame.goal_entry = goal_entry
         self.frame.coordinates_check = coordinates_check
         self.frame.calculate = calculate_button
+        self.frame.save = save_button
 
     def draw_field(self):
         self.app.coordinates = self.coordinates_var.get()
@@ -173,6 +182,9 @@ class Menu:
 
     def calculate(self):
         self.app.calculate()
+
+    def save(self):
+        self.app.save()
 
 
 class DotButton:
@@ -262,8 +274,8 @@ class App:
         tkmb.showinfo(title='Calculation', message='You have {} points!'.format(points))
 
     @staticmethod
-    def safe_dialog():
-        pass
+    def save_dialog():
+        return tksd.askstring(title='Saving', prompt='Enter team\'s name.')
 
     def can_put(self):
         if len(self.checkers_used_list) < self.checkers:
@@ -290,11 +302,10 @@ class App:
         points = a.calculate(self.checkers_used_list, self.goal)
         self.show_points(points)
 
-    def safe(self):
+    def save(self):
         points = a.calculate(self.checkers_used_list, self.goal)
-        self.safe_dialog()
-        lg.team_lg.info('Team: "{name}" Points: {points} Checkers: {chekers}'.format(
-            name='NONE',
+        lg.team_lg.info('Team: "{team}" Points: {points} Checkers: {chekers}'.format(
+            team=self.save_dialog(),
             points=points,
             chekers=self.checkers_used_list,
         ))
