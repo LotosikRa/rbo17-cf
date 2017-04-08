@@ -30,18 +30,16 @@ class Dot:
     def check_connection(self, hand, dot):
         """ Checks if self have connection to this dot by this hand"""
         if hand in self.hands:
-            Chain(hand, self).register().add(self.hands[hand]).register().add(dot)
+            Chain(hand, self).add(self.hands[hand]).add(dot).register()
         else:
             self.hands[hand] = dot
 
     def register(self):
         for item in self.dots:
             if self.x == item.x and self.y == item.y:
-                del self  # very dangerous place !!!
-                return False
+                del self
         else:
             self.dots.append(self)
-            return True
 
     def __repr__(self):
         return '<Dot x:{} y:{}>'.format(self.x, self.y)
@@ -84,11 +82,14 @@ class Hand:
 class Chain:
     """ Represents groups of Dots connected with the same Hands (e.g. checkers on one line). """
     chains = []
+    goal = None
+    approves = 0
 
     def __init__(self, hand, dot1):
         self.hand = hand
         self.dots = [dot1]
         self.len = 1
+        self.approved = False
 
     def _add_dot(self, dot):
         if not dot in self.dots:
@@ -100,6 +101,8 @@ class Chain:
     def add(self, dot):
         if self._add_dot(dot):
             self.len += 1
+            if self.len >= self.goal and not self.approved:
+                self._approve()
         return self
 
     def _check_in(self, other):
@@ -113,6 +116,10 @@ class Chain:
         for dot in self.dots:
             if dot not in other.dots:
                 other.add(dot)
+
+    def _approve(self):
+        Chain.approves = self.approves + 1
+        self.approved = True
 
     def register(self):
         for item in self.chains:
@@ -139,18 +146,12 @@ def init_hands():
         dot.build_hands()
 
 
-def search_goals(goal):
-    points = 0
-    for chain in Chain.chains:
-        if chain.len >= goal:
-            points += 1
-    return points
-
-
 def clear():
     Dot.dots = []
     Hand.hads = []
     Chain.chains = []
+    Chain.approves = 0
+    Chain.goal = 0
 
 
 # main function
@@ -164,9 +165,10 @@ def calculate(input_array, goal=GOAL, x_long=COLUMNS, y_long=ROWS, total_dots=CH
     :return: points
     """
     try:
+        Chain.goal = goal
         init_dots(input_array)
         init_hands()
-        points = search_goals(goal)
+        points = Chain.approves
     except Exception as e:
         calc_lg.error(e)
         points = 'ERROR'
