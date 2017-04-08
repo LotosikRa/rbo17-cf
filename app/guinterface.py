@@ -128,6 +128,8 @@ class Menu:
                                            width=self._width,
                                            variable=self.coordinates_var,
                                            onvalue=True, offvalue=False,)
+        checkers_used_label = tk.Label(text='Checkers used: 0',
+                                       width=self._width,)
         # pack
         quit_button.pack(side=tk.TOP)
         draw_button.pack(side=tk.TOP)
@@ -143,7 +145,6 @@ class Menu:
         # bind
         self.frame.quit = quit_button
         self.frame.draw = draw_button
-        self.frame.reset = reset_button
         self.frame.columns_label = columns_label
         self.frame.columns_entry = columns_entry
         self.frame.rows_label = rows_label
@@ -153,6 +154,8 @@ class Menu:
         self.frame.goal_label = goal_label
         self.frame.goal_entry = goal_entry
         self.frame.coordinates_check = coordinates_check
+        self.frame.checkers_used = checkers_used_label
+        self.frame.reset = reset_button
         self.frame.calculate = calculate_button
         self.frame.save = save_button
 
@@ -168,6 +171,7 @@ class Menu:
         self.frame.calculate.pack(side=tk.BOTTOM)
         self.frame.save.pack(side=tk.BOTTOM)
         self.frame.reset.pack(side=tk.BOTTOM)
+        self.frame.checkers_used.pack(side=tk.BOTTOM)
 
     def reset_field(self):
         self.app.field.reset()
@@ -278,6 +282,9 @@ class App:
 
     def put(self, x, y):
         self.checkers_used_list.append((x, y))
+        self.menu_frame.checkers_used.configure(text='Checkers used: {}'.format(
+            len(self.checkers_used_list)
+        ))
 
     def remove(self, x, y):
         self.checkers_used_list.remove((x, y))
