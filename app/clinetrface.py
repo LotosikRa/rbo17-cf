@@ -1,5 +1,5 @@
 """ This modula have all what cli need. """
-from . import calculate
+from .algorithm import algo
 from settings import (CHECKERS,
                       COLUMNS,
                       ROWS,
@@ -62,7 +62,7 @@ def launch_cli():
     while input('Press `Y` to continue: ') in ['Y', '']:
         indata = get_user_input()
         try:
-            outdata = calculate(*indata)
+            outdata = algo.calculate(*indata)
         except Exception as e:
             print(e)
         else:
