@@ -8,7 +8,7 @@ GOAL = 4
 
 # Logging
 CALC_LOGFILE = 'calc.log'
-TEAM_LOGFILE = 'teams.log'
+TEAM_LOGFILE = 'names.log'
 
 # Design
 COORDINATES = True
@@ -17,11 +17,6 @@ FIELD_BACKGROUND = 'grey'
 
 MENU_WIDTH = 20
 MENU_BACKGROUND = 'red'
-
-QUIT_BG = 'white'
-QUIT_FG = 'gold'
-QUIT_HEIGHT = 3
-QUIT_PADY = 10
 
 DRAW_BG = 'CadetBlue1'
 

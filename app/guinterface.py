@@ -7,47 +7,7 @@ import settings as s
 import app.logger as lg
 
 
-class Field:
-    """ Represents Checkers field. """
-
-    # graphics
-    _background = s.FIELD_BACKGROUND
-
-    def __init__(self, app, frame):
-        self.app = app
-        self.frame = frame
-        self.visible = False
-        # configure frame
-        self.frame.configure(background=self._background)
-
-    def draw(self, **kwargs):
-        if self.visible:
-            self.clear()
-        self.app.checkers = kwargs.get('checkers', self.app._checkers)
-        self.app.rows = kwargs.get('rows', self.app._rows)
-        self.app.columns = kwargs.get('columns', self.app._columns)
-        # draw widgets
-        for y in range(self.app.rows):
-            for x in range(self.app.columns):
-                DotButton(self.app, self, x, y)
-        self.visible = True
-
-    def clear(self):
-        for item in DotButton.all:
-            item.widget.grid_forget()
-            del item.widget
-            del item
-        DotButton.all = []
-        self.app.checkers_used_list = []
-        self.visible = False
-
-    def reset(self):
-        for item in DotButton.all:
-            item.deactivate()
-        self.app.checkers_used_list = []
-        algo.clear()
-
-
+# DotButton
 class DotButton:
     all = []
     # graphics
@@ -99,15 +59,39 @@ class DotButton:
         self.widget['foreground'] = self._not_active_font
 
 
+# Frames
+class Field:
+    """ Represents Checkers field. """
+
+    # graphics
+    _background = s.FIELD_BACKGROUND
+
+    def __init__(self, app, frame):
+        self.app = app
+        self.frame = frame
+        # configure frame
+        self.frame.configure(background=self._background)
+
+    def draw(self, **kwargs):
+        self.app.checkers = kwargs.get('checkers', self.app._checkers)
+        self.app.rows = kwargs.get('rows', self.app._rows)
+        self.app.columns = kwargs.get('columns', self.app._columns)
+        # draw widgets
+        for y in range(self.app.rows):
+            for x in range(self.app.columns):
+                DotButton(self.app, self, x, y)
+
+    def reset(self):
+        for item in DotButton.all:
+            item.deactivate()
+        self.app.checkers_used_list = []
+        algo.clear()
+
+
 class Menu:
     """ Represents Menu Frame. """
 
     _background = s.MENU_BACKGROUND
-    _width = s.MENU_WIDTH
-    _quit_fg = s.QUIT_FG
-    _quit_bg = s.QUIT_BG
-    _quit_height = s.QUIT_HEIGHT
-    _quit_pady = s.QUIT_PADY
     _draw_bg = s.DRAW_BG
     _reset_bg = s.RESET_BG
     _save_height = s.SAVE_HIGHT
@@ -136,11 +120,6 @@ class Menu:
 
     def draw(self):
         # init
-        quit_button = tk.Button(text='QUIT',
-                                command=quit,
-                                width=self._width, height=self._quit_height,
-                                fg=self._quit_fg, bg=self._quit_bg,
-                                pady=self._quit_pady,)
         draw_button = tk.Button(text='Draw',
                                 command=self.draw_field,
                                 width=self._width,
@@ -178,19 +157,17 @@ class Menu:
         points_label = tk.Label(text='Points: 0',
                                 width=self._width)
         # pack
-        quit_button.pack(side=tk.TOP)
         draw_button.pack(side=tk.TOP)
-        columns_label.pack()
-        columns_entry.pack()
-        rows_label.pack()
-        rows_entry.pack()
-        checkers_label.pack()
-        checkers_entry.pack()
-        goal_label.pack()
-        goal_entry.pack()
-        coordinates_check.pack()
+        columns_label.pack(side=tk.TOP)
+        columns_entry.pack(side=tk.TOP)
+        rows_label.pack(side=tk.TOP)
+        rows_entry.pack(side=tk.TOP)
+        checkers_label.pack(side=tk.TOP)
+        checkers_entry.pack(side=tk.TOP)
+        goal_label.pack(side=tk.TOP)
+        goal_entry.pack(side=tk.TOP)
+        coordinates_check.pack(side=tk.TOP)
         # bind
-        self.frame.quit = quit_button
         self.frame.draw = draw_button
         self.frame.columns_label = columns_label
         self.frame.columns_entry = columns_entry
@@ -207,19 +184,31 @@ class Menu:
         self.frame.save = save_button
 
     def draw_field(self):
+        self.clear()
         self.app.coordinates = self.coordinates_var.get()
         self.app.field.draw(
             columns=self.columns_var.get(),
             rows=self.rows_var.get(),
             checkers=self.checkers_var.get(),
         )
-        self.app.goal = self.goal_var.get()
-        algo.set_goal(self.app.goal)
+        algo.set_goal(self.goal_var.get())
         # Show hidden buttons
         self.frame.save.pack(side=tk.BOTTOM)
         self.frame.reset.pack(side=tk.BOTTOM)
         self.frame.points.pack(side=tk.BOTTOM)
         self.frame.checkers_used.pack(side=tk.BOTTOM)
+        self.frame.draw.configure(text='Redraw')
+
+    def clear(self):
+        for item in DotButton.all:
+            item.widget.grid_forget()
+            del item.widget
+            del item
+        DotButton.all = []
+        self.app.checkers_used_list = []
+        algo.clear()
+        self.update_points_label()
+        self.update_chackers_used_label()
 
     def reset_field(self):
         self.app.field.reset()
@@ -267,7 +256,6 @@ class App:
         self.checkers = None
         self.rows = None
         self.columns = None
-        self.goal = None
         self.coordinates = None
         self.checkers_used_list = []
 
@@ -277,7 +265,10 @@ class App:
 
     @staticmethod
     def save_dialog():
-        return tksd.askstring(title='Saving', prompt='Enter team\'s name.')
+        return tksd.askstring(title='Saving',
+                              prompt='You have {} points.\nEnter the name.'.format(
+                                  algo.get_points()
+                              ))
 
     def can_put(self):
         if len(self.checkers_used_list) < self.checkers:
@@ -307,11 +298,10 @@ class App:
             return True
 
     def save(self):
-        points = algo.calculate(self.checkers_used_list, self.goal)
-        lg.team_lg.info('Team: "{team}" Points: {points} Checkers: {chekers}'.format(
-            team=self.save_dialog(),
-            points=points,
-            chekers=self.checkers_used_list,
+        lg.team_lg.info('Name: "{name}" Points: {points} Checkers: {checkers}'.format(
+            name=self.save_dialog(),
+            points=algo.get_points(),
+            checkers=self.checkers_used_list,
         ))
 
 
