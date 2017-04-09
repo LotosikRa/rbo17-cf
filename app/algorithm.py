@@ -20,6 +20,7 @@ class Dot:
         self.x = x
         self.y = y
         self.hands = {}
+        self.chains = []
 
     def build_hands(self):
         for dot in self.dots:
@@ -30,7 +31,9 @@ class Dot:
     def check_connection(self, hand, dot):
         """ Checks if self have connection to this dot by this hand"""
         if hand in self.hands:
-            Chain(hand, self).add(self.hands[hand]).add(dot).register()
+            chain = Chain(hand, self).add(self.hands[hand]).add(dot).register()
+            if not chain in self.chains:
+                self.chains.append(chain)
         else:
             self.hands[hand] = dot
 
@@ -38,11 +41,18 @@ class Dot:
         for item in self.dots:
             if self.x == item.x and self.y == item.y:
                 del self
+                return item
         else:
             self.dots.append(self)
+            return self
 
     def __repr__(self):
         return '<Dot x:{} y:{}>'.format(self.x, self.y)
+
+    def destroy(self):
+        for chain in self.chains:
+            chain.remove(self)
+            del self
 
 
 class Hand:
@@ -105,6 +115,14 @@ class Chain:
                 self._approve()
         return self
 
+    def remove(self, dot):
+        self.dots.remove(dot)
+        self.len -= 1
+        if self.len <= 2:
+            del self
+        elif self.len < self.goal and self.approved:
+            self._unapprove()
+
     def _check_in(self, other):
         for dot in self.dots:
             if dot in other.dots:
@@ -120,6 +138,10 @@ class Chain:
     def _approve(self):
         Chain.approves = self.approves + 1
         self.approved = True
+
+    def _unapprove(self):
+        Chain.approves = self.approves -1
+        self.approved = False
 
     def register(self):
         for item in self.chains:
@@ -152,14 +174,14 @@ class Algorithm:
 
     def clear(self):
         self.Dot.dots = []
-        self.Hand.hads = []
+        self.Hand.hands = []
         self.Chain.chains = []
         self.Chain.approves = 0
         self.Chain.goal = 0
 
     def calculate(self, array, goal=GOAL):
         try:
-            self.Chain.goal = goal
+            self.set_goal(goal)
             self.init_dots(array)
             self.init_hands()
             points = self.get_points()
@@ -174,6 +196,19 @@ class Algorithm:
 
     def get_points(self):
         return self.Chain.approves
+
+    def new_dot(self, x, y):
+        Dot(x, y).register().build_hands()
+
+    def remove_dot(self, x, y):
+        for dot in self.Dot.dots:
+            if dot.x == x and dot.y == y:
+                dot.destroy()
+        else:
+            RuntimeWarning('Dot with this coordinates does not exist.')
+
+    def set_goal(self, goal: int):
+        self.Chain.goal = goal
 
 
 algo = Algorithm()
