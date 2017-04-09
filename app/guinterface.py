@@ -92,6 +92,7 @@ class Menu:
     """ Represents Menu Frame. """
 
     _background = s.MENU_BACKGROUND
+    _width = s.MENU_WIDTH
     _draw_bg = s.DRAW_BG
     _reset_bg = s.RESET_BG
     _save_height = s.SAVE_HIGHT

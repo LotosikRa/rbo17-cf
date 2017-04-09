@@ -177,7 +177,6 @@ class Algorithm:
         self.Hand.hands = []
         self.Chain.chains = []
         self.Chain.approves = 0
-        self.Chain.goal = 0
 
     def calculate(self, array, goal=GOAL):
         try:
