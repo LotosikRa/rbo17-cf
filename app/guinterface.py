@@ -185,7 +185,7 @@ class Menu:
         self.frame.save = save_button
 
     def draw_field(self):
-        self.clear()
+        self.clear_field()
         self.app.coordinates = self.coordinates_var.get()
         self.app.field.draw(
             columns=self.columns_var.get(),
@@ -200,7 +200,7 @@ class Menu:
         self.frame.checkers_used.pack(side=tk.BOTTOM)
         self.frame.draw.configure(text='Redraw')
 
-    def clear(self):
+    def clear_field(self):
         for item in DotButton.all:
             item.widget.grid_forget()
             del item.widget
@@ -217,7 +217,18 @@ class Menu:
         self.update_points_label()
 
     def save(self):
-        self.app.save()
+        lg.team_lg.info('Name: "{name}" Points: {points} Checkers: {checkers}'.format(
+            name=self.save_dialog(),
+            points=algo.get_points(),
+            checkers=self.app.checkers_used_list,
+        ))
+
+    @staticmethod
+    def save_dialog():
+        return tksd.askstring(title='Saving',
+                              prompt='You have {} points.\nEnter the name.'.format(
+                                  algo.get_points()
+                              ))
 
     def update_chackers_used_label(self):
         self.frame.checkers_used.configure(text='Checkers used: {}'.format(
@@ -243,33 +254,27 @@ class App:
 
     def __init__(self, master):
         self.master = master
+        self._define_frames()
+        self._define_variables()
 
-        self.field_frame = tk.Frame(self.master)
+    def _define_frames(self):
+        self._define_field_frame()
+        # define Menu frame
         self.menu_frame = tk.Frame(self.master)
-        # pack frames
-        self.field_frame.pack(side=tk.LEFT)
         self.menu_frame.pack(side=tk.RIGHT)
-
         self.menu = Menu(self, self.menu_frame)
+
+    def _define_field_frame(self):
+        self.field_frame = tk.Frame(self.master)
+        self.field_frame.pack(side=tk.LEFT)
         self.field = Field(self, self.field_frame)
 
-        # define attributes
+    def _define_variables(self):
         self.checkers = None
         self.rows = None
         self.columns = None
         self.coordinates = None
         self.checkers_used_list = []
-
-    @staticmethod
-    def show_points(points):
-        tkmb.showinfo(title='Calculation', message='You have {} points!'.format(points))
-
-    @staticmethod
-    def save_dialog():
-        return tksd.askstring(title='Saving',
-                              prompt='You have {} points.\nEnter the name.'.format(
-                                  algo.get_points()
-                              ))
 
     def can_put(self):
         if len(self.checkers_used_list) < self.checkers:
@@ -298,16 +303,25 @@ class App:
         else:
             return True
 
-    def save(self):
-        lg.team_lg.info('Name: "{name}" Points: {points} Checkers: {checkers}'.format(
-            name=self.save_dialog(),
-            points=algo.get_points(),
-            checkers=self.checkers_used_list,
-        ))
 
+class TeamApp(App):
+    """ Application for usage in olympiads. """
+
+    def _define_frames(self):
+        self._define_field_frame()
+        # define Settings TopLevel
+        self.settings_frame = tk.Toplevel(self.master)
+        self.settings_frame.title('Game settings')
+        self.settings = None
 
 # main
 def launch_gui():
     root = tk.Tk()
     App(root)
+    root.mainloop()
+
+
+def launch_olymp():
+    root = tk.Tk()
+    TeamApp(root)
     root.mainloop()

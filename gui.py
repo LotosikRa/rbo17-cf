@@ -1,4 +1,4 @@
-""" This module runs algorithm with CLI. """
+""" This module runs algorithm with GUI. """
 from app import launch_gui
 
 
