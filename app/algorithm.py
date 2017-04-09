@@ -52,7 +52,6 @@ class Dot:
     def destroy(self):
         for chain in self.chains:
             chain.remove(self)
-            del self
 
 
 class Hand:

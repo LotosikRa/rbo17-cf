@@ -45,142 +45,7 @@ class Field:
         for item in DotButton.all:
             item.deactivate()
         self.app.checkers_used_list = []
-
-
-class Menu:
-    """ Represents Menu Frame. """
-
-    _background = s.MENU_BACKGROUND
-    _width = s.MENU_WIDTH
-    _quit_fg = s.QUIT_FG
-    _quit_bg = s.QUIT_BG
-    _quit_height = s.QUIT_HEIGHT
-    _quit_pady = s.QUIT_PADY
-    _draw_bg = s.DRAW_BG
-    _reset_bg = s.RESET_BG
-    _save_height = s.SAVE_HIGHT
-    _save_bg = s.SAVE_BG
-    _calculate_height = s.CALCULATE_HIGHT
-    _calculate_bg = s.CALCULATE_BG
-
-    def __init__(self, app, frame):
-        self.app = app
-        self.frame = frame
-        self.define_variables()
-        # draw
-        self.frame.configure(background=self._background)
-        self.draw()
-
-    def define_variables(self):
-        self.columns_var = tk.IntVar()
-        self.rows_var = tk.IntVar()
-        self.checkers_var = tk.IntVar()
-        self.goal_var = tk.IntVar()
-        self.coordinates_var = tk.BooleanVar()
-        # set defaults
-        self.columns_var.set(self.app._columns)
-        self.rows_var.set(self.app._rows)
-        self.checkers_var.set(self.app._checkers)
-        self.goal_var.set(self.app._goal)
-        self.coordinates_var.set(self.app._coordinates)
-
-    def draw(self):
-        # init
-        quit_button = tk.Button(text='QUIT',
-                                command=quit,
-                                width=self._width, height=self._quit_height,
-                                fg=self._quit_fg, bg=self._quit_bg,
-                                pady=self._quit_pady,)
-        draw_button = tk.Button(text='Draw',
-                                command=self.draw_field,
-                                width=self._width,
-                                bg=self._draw_bg)
-        reset_button = tk.Button(text='Reset',
-                                 command=self.reset_field,
-                                 width=self._width,
-                                 bg=self._reset_bg,)
-        save_button = tk.Button(text='Save',
-                                command=self.save,
-                                width=self._width, height=self._save_height,
-                                bg=self._save_bg)
-        calculate_button = tk.Button(text='Calculate',
-                                     command=self.calculate,
-                                     height=self._calculate_height,
-                                     width=self._width,
-                                     bg=self._calculate_bg)
-        columns_label = tk.Label(text='Columns:',
-                                 width=self._width)
-        columns_entry = tk.Entry(textvariable=self.columns_var,
-                                 width=self._width)
-        rows_label = tk.Label(text='Rows:',
-                              width=self._width)
-        rows_entry = tk.Entry(textvariable=self.rows_var,
-                              width=self._width,)
-        checkers_label = tk.Label(text='Checkers:',
-                                  width=self._width)
-        checkers_entry = tk.Entry(textvariable=self.checkers_var,
-                                  width=self._width,)
-        goal_label = tk.Label(text='Goal:',
-                              width=self._width)
-        goal_entry = tk.Entry(textvariable=self.goal_var,
-                              width=self._width,)
-        coordinates_check = tk.Checkbutton(text='Show coordinates?',
-                                           width=self._width,
-                                           variable=self.coordinates_var,
-                                           onvalue=True, offvalue=False,)
-        checkers_used_label = tk.Label(text='Checkers used: 0',
-                                       width=self._width,)
-        # pack
-        quit_button.pack(side=tk.TOP)
-        draw_button.pack(side=tk.TOP)
-        columns_label.pack()
-        columns_entry.pack()
-        rows_label.pack()
-        rows_entry.pack()
-        checkers_label.pack()
-        checkers_entry.pack()
-        goal_label.pack()
-        goal_entry.pack()
-        coordinates_check.pack()
-        # bind
-        self.frame.quit = quit_button
-        self.frame.draw = draw_button
-        self.frame.columns_label = columns_label
-        self.frame.columns_entry = columns_entry
-        self.frame.rows_label = rows_label
-        self.frame.rows_entry = rows_entry
-        self.frame.checkers_label = checkers_label
-        self.frame.checkers_entry = checkers_entry
-        self.frame.goal_label = goal_label
-        self.frame.goal_entry = goal_entry
-        self.frame.coordinates_check = coordinates_check
-        self.frame.checkers_used = checkers_used_label
-        self.frame.reset = reset_button
-        self.frame.calculate = calculate_button
-        self.frame.save = save_button
-
-    def draw_field(self):
-        self.app.coordinates = self.coordinates_var.get()
-        self.app.field.draw(
-            columns=self.columns_var.get(),
-            rows=self.rows_var.get(),
-            checkers=self.checkers_var.get(),
-        )
-        self.app.goal = self.goal_var.get()
-        # Show hidden buttons
-        self.frame.calculate.pack(side=tk.BOTTOM)
-        self.frame.save.pack(side=tk.BOTTOM)
-        self.frame.reset.pack(side=tk.BOTTOM)
-        self.frame.checkers_used.pack(side=tk.BOTTOM)
-
-    def reset_field(self):
-        self.app.field.reset()
-
-    def calculate(self):
-        self.app.calculate()
-
-    def save(self):
-        self.app.save()
+        algo.clear()
 
 
 class DotButton:
@@ -234,6 +99,147 @@ class DotButton:
         self.widget['foreground'] = self._not_active_font
 
 
+class Menu:
+    """ Represents Menu Frame. """
+
+    _background = s.MENU_BACKGROUND
+    _width = s.MENU_WIDTH
+    _quit_fg = s.QUIT_FG
+    _quit_bg = s.QUIT_BG
+    _quit_height = s.QUIT_HEIGHT
+    _quit_pady = s.QUIT_PADY
+    _draw_bg = s.DRAW_BG
+    _reset_bg = s.RESET_BG
+    _save_height = s.SAVE_HIGHT
+    _save_bg = s.SAVE_BG
+
+    def __init__(self, app, frame):
+        self.app = app
+        self.frame = frame
+        self.define_variables()
+        # draw
+        self.frame.configure(background=self._background)
+        self.draw()
+
+    def define_variables(self):
+        self.columns_var = tk.IntVar()
+        self.rows_var = tk.IntVar()
+        self.checkers_var = tk.IntVar()
+        self.goal_var = tk.IntVar()
+        self.coordinates_var = tk.BooleanVar()
+        # set defaults
+        self.columns_var.set(self.app._columns)
+        self.rows_var.set(self.app._rows)
+        self.checkers_var.set(self.app._checkers)
+        self.goal_var.set(self.app._goal)
+        self.coordinates_var.set(self.app._coordinates)
+
+    def draw(self):
+        # init
+        quit_button = tk.Button(text='QUIT',
+                                command=quit,
+                                width=self._width, height=self._quit_height,
+                                fg=self._quit_fg, bg=self._quit_bg,
+                                pady=self._quit_pady,)
+        draw_button = tk.Button(text='Draw',
+                                command=self.draw_field,
+                                width=self._width,
+                                bg=self._draw_bg)
+        reset_button = tk.Button(text='Reset',
+                                 command=self.reset_field,
+                                 width=self._width,
+                                 bg=self._reset_bg,)
+        save_button = tk.Button(text='Save',
+                                command=self.save,
+                                width=self._width, height=self._save_height,
+                                bg=self._save_bg)
+        columns_label = tk.Label(text='Columns:',
+                                 width=self._width)
+        columns_entry = tk.Entry(textvariable=self.columns_var,
+                                 width=self._width)
+        rows_label = tk.Label(text='Rows:',
+                              width=self._width)
+        rows_entry = tk.Entry(textvariable=self.rows_var,
+                              width=self._width,)
+        checkers_label = tk.Label(text='Checkers:',
+                                  width=self._width)
+        checkers_entry = tk.Entry(textvariable=self.checkers_var,
+                                  width=self._width,)
+        goal_label = tk.Label(text='Goal:',
+                              width=self._width)
+        goal_entry = tk.Entry(textvariable=self.goal_var,
+                              width=self._width,)
+        coordinates_check = tk.Checkbutton(text='Show coordinates?',
+                                           width=self._width,
+                                           variable=self.coordinates_var,
+                                           onvalue=True, offvalue=False,)
+        checkers_used_label = tk.Label(text='Checkers used: 0',
+                                       width=self._width,)
+        points_label = tk.Label(text='Points: 0',
+                                width=self._width)
+        # pack
+        quit_button.pack(side=tk.TOP)
+        draw_button.pack(side=tk.TOP)
+        columns_label.pack()
+        columns_entry.pack()
+        rows_label.pack()
+        rows_entry.pack()
+        checkers_label.pack()
+        checkers_entry.pack()
+        goal_label.pack()
+        goal_entry.pack()
+        coordinates_check.pack()
+        # bind
+        self.frame.quit = quit_button
+        self.frame.draw = draw_button
+        self.frame.columns_label = columns_label
+        self.frame.columns_entry = columns_entry
+        self.frame.rows_label = rows_label
+        self.frame.rows_entry = rows_entry
+        self.frame.checkers_label = checkers_label
+        self.frame.checkers_entry = checkers_entry
+        self.frame.goal_label = goal_label
+        self.frame.goal_entry = goal_entry
+        self.frame.coordinates_check = coordinates_check
+        self.frame.checkers_used = checkers_used_label
+        self.frame.points = points_label
+        self.frame.reset = reset_button
+        self.frame.save = save_button
+
+    def draw_field(self):
+        self.app.coordinates = self.coordinates_var.get()
+        self.app.field.draw(
+            columns=self.columns_var.get(),
+            rows=self.rows_var.get(),
+            checkers=self.checkers_var.get(),
+        )
+        self.app.goal = self.goal_var.get()
+        algo.set_goal(self.app.goal)
+        # Show hidden buttons
+        self.frame.save.pack(side=tk.BOTTOM)
+        self.frame.reset.pack(side=tk.BOTTOM)
+        self.frame.points.pack(side=tk.BOTTOM)
+        self.frame.checkers_used.pack(side=tk.BOTTOM)
+
+    def reset_field(self):
+        self.app.field.reset()
+        self.update_chackers_used_label()
+        self.update_points_label()
+
+    def save(self):
+        self.app.save()
+
+    def update_chackers_used_label(self):
+        self.frame.checkers_used.configure(text='Checkers used: {}'.format(
+            len(self.app.checkers_used_list)
+        ))
+
+    def update_points_label(self):
+        self.frame.points.configure(text='Points: {}'.format(
+            algo.get_points()
+        ))
+
+
 # main Application
 class App:
     """ Represents GUI tkinter application. """
@@ -282,12 +288,15 @@ class App:
 
     def put(self, x, y):
         self.checkers_used_list.append((x, y))
-        self.menu_frame.checkers_used.configure(text='Checkers used: {}'.format(
-            len(self.checkers_used_list)
-        ))
+        algo.new_dot(x, y)
+        self.menu.update_chackers_used_label()
+        self.menu.update_points_label()
 
     def remove(self, x, y):
         self.checkers_used_list.remove((x, y))
+        algo.remove_dot(x, y)
+        self.menu.update_chackers_used_label()
+        self.menu.update_points_label()
 
     def is_used(self, x, y):
         try:
@@ -296,10 +305,6 @@ class App:
             return False
         else:
             return True
-
-    def calculate(self):
-        points = algo.calculate(self.checkers_used_list, self.goal)
-        self.show_points(points)
 
     def save(self):
         points = algo.calculate(self.checkers_used_list, self.goal)
@@ -313,5 +318,5 @@ class App:
 # main
 def launch_gui():
     root = tk.Tk()
-    app = App(root)
+    App(root)
     root.mainloop()

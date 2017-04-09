@@ -28,10 +28,7 @@ DRAW_BG = 'CadetBlue1'
 RESET_BG = 'yellow2'
 
 SAVE_HIGHT = 5
-SAVE_BG = 'CadetBlue3'
-
-CALCULATE_BG = 'green3'
-CALCULATE_HIGHT = 10
+SAVE_BG = 'green3'
 
 DB_HEIGHT = 1
 DB_WIDTH = 1
