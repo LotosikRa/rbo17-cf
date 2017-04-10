@@ -62,7 +62,7 @@ def launch_cli():
     while input('Press `Y` to continue: ') in ['Y', '']:
         indata = get_user_input()
         try:
-            outdata = algo.calculate(*indata)
+            outdata = algo._calculate(*indata)
         except Exception as e:
             print(e)
         else:
