@@ -84,8 +84,7 @@ class Field:
     def reset(self):
         for item in DotButton.all:
             item.deactivate()
-        self.app.checkers_used_list = []
-        algo.clear()
+        self.app.clear()
 
 
 class Menu:
@@ -186,13 +185,13 @@ class Menu:
 
     def draw_field(self):
         self.clear_field()
+        self.app.set_goal(self.goal_var.get())
         self.app.coordinates = self.coordinates_var.get()
         self.app.field.draw(
             columns=self.columns_var.get(),
             rows=self.rows_var.get(),
             checkers=self.checkers_var.get(),
         )
-        algo.set_goal(self.goal_var.get())
         # Show hidden buttons
         self.frame.save.pack(side=tk.BOTTOM)
         self.frame.reset.pack(side=tk.BOTTOM)
@@ -206,29 +205,18 @@ class Menu:
             del item.widget
             del item
         DotButton.all = []
-        self.app.checkers_used_list = []
-        algo.clear()
+        self.app.clear()
         self.update_points_label()
         self.update_chackers_used_label()
 
     def reset_field(self):
         self.app.field.reset()
+        self.app.clear()
         self.update_chackers_used_label()
         self.update_points_label()
 
     def save(self):
-        lg.team_lg.info('Name: "{name}" Points: {points} Checkers: {checkers}'.format(
-            name=self.save_dialog(),
-            points=algo.get_points(),
-            checkers=self.app.checkers_used_list,
-        ))
-
-    @staticmethod
-    def save_dialog():
-        return tksd.askstring(title='Saving',
-                              prompt='You have {} points.\nEnter the name.'.format(
-                                  algo.get_points()
-                              ))
+        self.app.save()
 
     def update_chackers_used_label(self):
         self.frame.checkers_used.configure(text='Checkers used: {}'.format(
@@ -237,7 +225,7 @@ class Menu:
 
     def update_points_label(self):
         self.frame.points.configure(text='Points: {}'.format(
-            algo.get_points()
+            self.app.points
         ))
 
 
@@ -273,8 +261,19 @@ class App:
         self.checkers = None
         self.rows = None
         self.columns = None
+        self.goal = None
         self.coordinates = None
         self.checkers_used_list = []
+        self.points = 0
+
+    def set_goal(self, goal: int):
+        self.goal = goal
+
+    def save_dialog(self):
+        return tksd.askstring(title='Saving',
+                              prompt='You have {} points.\nEnter the name.'.format(
+                                  self.points
+                              ))
 
     def can_put(self):
         if len(self.checkers_used_list) < self.checkers:
@@ -285,24 +284,38 @@ class App:
 
     def put(self, x, y):
         self.checkers_used_list.append((x, y))
-        algo.new_dot(x, y)
+        self.points = self._calculate()
         self.menu.update_chackers_used_label()
         self.menu.update_points_label()
 
     def remove(self, x, y):
         self.checkers_used_list.remove((x, y))
-        algo.remove_dot(x, y)
+        self.points = self._calculate()
         self.menu.update_chackers_used_label()
         self.menu.update_points_label()
 
+    def clear(self):
+        self.checkers_used_list = []
+        self.points = 0
+        algo.clear()
+
     def is_used(self, x, y):
         try:
-            index = self.checkers_used_list.index((x, y))
+            self.checkers_used_list.index((x, y))
         except ValueError:
             return False
         else:
             return True
 
+    def save(self):
+        lg.team_lg.info('Name: "{name}" Points: {points} Checkers: {checkers}'.format(
+            name=self.save_dialog(),
+            points=self.points,
+            checkers=self.checkers_used_list,
+        ))
+
+    def _calculate(self):
+        return algo.calculate(self.checkers_used_list, self.goal)
 
 class TeamApp(App):
     """ Application for usage in olympiads. """
