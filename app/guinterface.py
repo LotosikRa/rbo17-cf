@@ -7,6 +7,12 @@ import settings as s
 import app.logger as lg
 
 
+CHECKERS_COLUMN = 1
+GOAL_COLUMN = 2
+COLUMNS_COLUMN = 3
+ROWS_COLUMN = 4
+
+
 # DotButton
 class DotButton:
     all = []
@@ -57,6 +63,91 @@ class DotButton:
     def deactivate(self):
         self.widget['background'] = self._not_active_background
         self.widget['foreground'] = self._not_active_font
+
+
+# Stage helper
+class Stage:
+    _checkers_column = CHECKERS_COLUMN
+    _goal_column = GOAL_COLUMN
+    _columns_column = COLUMNS_COLUMN
+    _rows_column = ROWS_COLUMN
+    _element_width = 6
+
+    _goal_values = tuple(range(3, 5+1))
+    _checkers_values = tuple(range(12, 20+1))
+    _columns_values = tuple(range(4, 15+1))
+    _rows_values = tuple(range(4, 15+1))
+
+    _goal_default = s.GOAL
+    _checkers_default = s.CHECKERS
+    _columns_default = s.COLUMNS
+    _rows_default = s.ROWS
+
+    def __init__(self, frame, row):
+        self.frame = frame
+        self.row = row
+        self._draw()
+
+    def _draw(self):
+        self.checkers_spinbox = tk.Spinbox(
+            self.frame,
+            values=self._checkers_values,
+            width=self._element_width,
+        )
+        self.goal_spinbox = tk.Spinbox(
+            self.frame,
+            values=self._goal_values,
+            width=self._element_width,
+        )
+        self.columns_spinbox = tk.Spinbox(
+            self.frame,
+            values=self._columns_values,
+            width=self._element_width,
+        )
+        self.rows_spinbox = tk.Spinbox(
+            self.frame,
+            values=self._rows_values,
+            width=self._element_width,
+        )
+        '''
+        # select defaults
+        self.checkers_spinbox.icursor(
+            self._checkers_values.index(self._checkers_default))
+        self.goal_spinbox.selection_adjust(
+            self._goal_values.index(self._goal_default))
+        self.columns_spinbox.selection_adjust(
+            self._columns_values.index(self._columns_default))
+        self.rows_spinbox.selection_adjust(
+            self._rows_values.index(self._rows_default))
+        '''
+        # grid
+        self.checkers_spinbox.grid(row=self.row, column=self._checkers_column)
+        self.goal_spinbox.grid(row=self.row, column=self._goal_column)
+        self.columns_spinbox.grid(row=self.row, column=self._columns_column)
+        self.rows_spinbox.grid(row=self.row, column=self._rows_column)
+
+    def destroy(self):
+        self.checkers_spinbox.grid_forget()
+        self.goal_spinbox.grid_forget()
+        self.columns_spinbox.grid_forget()
+        self.rows_spinbox.grid_forget()
+        del self
+
+    @property
+    def goal(self):
+        return self.goal_spinbox.get()
+
+    @property
+    def checkers(self):
+        return self.checkers_spinbox.get()
+
+    @property
+    def columns(self):
+        return self.columns_spinbox.get()
+
+    @property
+    def rows(self):
+        return self.rows_spinbox.get()
 
 
 # Frames
@@ -168,7 +259,7 @@ class MenuFrame:
         goal_entry.pack(side=tk.TOP)
         coordinates_check.pack(side=tk.TOP)
         # bind
-        self.frame.draw = draw_button
+        self.frame._draw = draw_button
         self.frame.columns_label = columns_label
         self.frame.columns_entry = columns_entry
         self.frame.rows_label = rows_label
@@ -187,7 +278,7 @@ class MenuFrame:
         self.clear_field()
         self.app.set_goal(self.goal_var.get())
         self.app.coordinates = self.coordinates_var.get()
-        self.app.field.draw(
+        self.app.field._draw(
             columns=self.columns_var.get(),
             rows=self.rows_var.get(),
             checkers=self.checkers_var.get(),
@@ -197,7 +288,7 @@ class MenuFrame:
         self.frame.reset.pack(side=tk.BOTTOM)
         self.frame.points.pack(side=tk.BOTTOM)
         self.frame.checkers_used.pack(side=tk.BOTTOM)
-        self.frame.draw.configure(text='Redraw')
+        self.frame._draw.configure(text='Redraw')
 
     def clear_field(self):
         for item in DotButton.all:
@@ -231,12 +322,83 @@ class MenuFrame:
 
 class SettingsFrame:
 
+    _width = 60
+
+    _button_column = 0
+    _checkers_column = CHECKERS_COLUMN
+    _goal_column = GOAL_COLUMN
+    _columns_column = COLUMNS_COLUMN
+    _rows_column = ROWS_COLUMN
+    _start_row = 8
+    _start_column_span = 5
+
+    _max_stages = 7
+
     def __init__(self, frame):
         self.frame = frame
+        # variables
+        self.game_settings = []
+        self.stages = []
+        self.del_buttons = [None, ]
+        # draw
         self.draw()
 
     def draw(self):
+        # configure frame
         self.frame.title('Game settings')
+        # define widgets
+        start_button = tk.Button(self.frame, text='Start',
+                                 width=self._width,
+                                 command=self.start)
+        add_new_stage_button = tk.Button(self.frame, text='Add new stage',
+                                         command=self.add_new_stage)
+        checkers_label = tk.Label(self.frame, text='Checkers')
+        goal_label = tk.Label(self.frame, text='Goal')
+        columns_label = tk.Label(self.frame, text='Columns')
+        rows_label = tk.Label(self.frame, text='Rows')
+        # pack
+        start_button.grid(column=0, row=self._start_row,
+                          columnspan=self._start_column_span)
+        add_new_stage_button.grid(column=self._button_column, row=0)
+        checkers_label.grid(column=self._checkers_column, row=0)
+        goal_label.grid(column=self._goal_column, row=0)
+        columns_label.grid(column=self._columns_column, row=0)
+        rows_label.grid(column=self._rows_column, row=0)
+        # add first row
+        self.add_new_stage(is_first=True)
+
+    def start(self):
+        pass
+
+    def add_new_stage(self, is_first=False):
+        number = len(self.stages)
+        row = number + 1
+        if len(self.stages) != self._max_stages:
+            self._add_new_stage(row)
+        if not is_first:
+            self._add_del_button(row, number)
+
+    def _add_new_stage(self, row):
+        stage = Stage(self.frame, row=row)
+        self.stages.append(stage)
+
+    def _add_del_button(self, row, number):
+        del_button = tk.Button(
+            self.frame,
+            text='delete',
+            command=self.destroy_stage(number)
+        )
+        del_button.grid(column=self._button_column, row=row)
+        self.del_buttons.append(del_button)
+
+    def _destroy_del_button(self, number: int):
+        self.del_buttons[number].grid_forget()
+
+    def destroy_stage(self, number: int):
+        def wrapped():
+            self.stages[number].destroy()
+            self._destroy_del_button(number)
+        return wrapped
 
 
 # main Application
