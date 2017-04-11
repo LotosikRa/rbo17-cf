@@ -60,7 +60,7 @@ class DotButton:
 
 
 # Frames
-class Field:
+class FieldFrame:
     """ Represents Checkers field. """
 
     # graphics
@@ -87,7 +87,7 @@ class Field:
         self.app.clear()
 
 
-class Menu:
+class MenuFrame:
     """ Represents Menu Frame. """
 
     _background = s.MENU_BACKGROUND
@@ -229,6 +229,16 @@ class Menu:
         ))
 
 
+class SettingsFrame:
+
+    def __init__(self, frame):
+        self.frame = frame
+        self.draw()
+
+    def draw(self):
+        self.frame.title('Game settings')
+
+
 # main Application
 class App:
     """ Represents GUI tkinter application. """
@@ -242,22 +252,20 @@ class App:
 
     def __init__(self, master):
         self.master = master
+        self._define_field_frame()
         self._define_frames()
+        self._define_common_variables()
         self._define_variables()
 
     def _define_frames(self):
-        self._define_field_frame()
-        # define Menu frame
-        self.menu_frame = tk.Frame(self.master)
-        self.menu_frame.pack(side=tk.RIGHT)
-        self.menu = Menu(self, self.menu_frame)
+        raise NotImplementedError()
 
     def _define_field_frame(self):
         self.field_frame = tk.Frame(self.master)
         self.field_frame.pack(side=tk.LEFT)
-        self.field = Field(self, self.field_frame)
+        self.field = FieldFrame(self, self.field_frame)
 
-    def _define_variables(self):
+    def _define_common_variables(self):
         self.checkers = None
         self.rows = None
         self.columns = None
@@ -266,14 +274,11 @@ class App:
         self.checkers_used_list = []
         self.points = 0
 
+    def _define_variables(self):
+        return NotImplementedError()
+
     def set_goal(self, goal: int):
         self.goal = goal
-
-    def save_dialog(self):
-        return tksd.askstring(title='Saving',
-                              prompt='You have {} points.\nEnter the name.'.format(
-                                  self.points
-                              ))
 
     def can_put(self):
         if len(self.checkers_used_list) < self.checkers:
@@ -307,6 +312,26 @@ class App:
         else:
             return True
 
+    def _calculate(self):
+        return algo.calculate(self.checkers_used_list, self.goal)
+
+
+class SingleApp(App):
+
+    def _define_frames(self):
+        self.menu_frame = tk.Frame(self.master)
+        self.menu_frame.pack(side=tk.RIGHT)
+        self.menu = MenuFrame(self, self.menu_frame)
+
+    def _define_variables(self):
+        pass
+
+    def save_dialog(self):
+        return tksd.askstring(title='Saving',
+                              prompt='You have {} points.\nEnter the name.'.format(
+                                  self.points
+                              ))
+
     def save(self):
         lg.team_lg.info('Name: "{name}" Points: {points} Checkers: {checkers}'.format(
             name=self.save_dialog(),
@@ -314,27 +339,28 @@ class App:
             checkers=self.checkers_used_list,
         ))
 
-    def _calculate(self):
-        return algo.calculate(self.checkers_used_list, self.goal)
 
-class TeamApp(App):
+class OlympApp(App):
     """ Application for usage in olympiads. """
 
     def _define_frames(self):
         self._define_field_frame()
         # define Settings TopLevel
         self.settings_frame = tk.Toplevel(self.master)
-        self.settings_frame.title('Game settings')
-        self.settings = None
+        self.setting = SettingsFrame(self.settings_frame)
+
+    def _define_variables(self):
+        pass
+
 
 # main
-def launch_gui():
+def launch_single():
     root = tk.Tk()
-    App(root)
+    SingleApp(root)
     root.mainloop()
 
 
 def launch_olymp():
     root = tk.Tk()
-    TeamApp(root)
+    OlympApp(root)
     root.mainloop()
