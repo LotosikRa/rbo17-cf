@@ -314,7 +314,7 @@ class App:
 
 
 # main
-def launch_gui():
+def launch_tkinter_gui():
     root = tk.Tk()
     App(root)
     root.mainloop()

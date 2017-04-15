@@ -1,3 +1,3 @@
 from .algorithm import algo
-from .clinetrface import launch_cli, parse_string_to_array
-from .guinterface import launch_gui
+from .cli_tools import launch_cli, parse_string_to_array
+from .tk_gui import launch_tkinter_gui
