@@ -97,6 +97,12 @@ class Menu:
     _save_height = s.SAVE_HIGHT
     _save_bg = s.SAVE_BG
 
+    _save_dialog_tmp = \
+        ''' Do you want to save this record?
+        
+            Name: {name}
+            Points: {points}'''
+
     def __init__(self, app, frame):
         self.app = app
         self.frame = frame
@@ -111,12 +117,14 @@ class Menu:
         self.checkers_var = tk.IntVar()
         self.goal_var = tk.IntVar()
         self.coordinates_var = tk.BooleanVar()
+        self.name_var = tk.StringVar()
         # set defaults
         self.columns_var.set(self.app._columns)
         self.rows_var.set(self.app._rows)
         self.checkers_var.set(self.app._checkers)
         self.goal_var.set(self.app._goal)
         self.coordinates_var.set(self.app._coordinates)
+        self.name_var.set(self.app._name)
 
     def draw(self):
         # init
@@ -148,10 +156,15 @@ class Menu:
                               width=self._width)
         goal_entry = tk.Entry(textvariable=self.goal_var,
                               width=self._width,)
+        name_label = tk.Label(text='Name:',
+                              width=self._width,)
+        name_entry = tk.Entry(textvariable=self.name_var,
+                              width=self._width,)
         coordinates_check = tk.Checkbutton(text='Show coordinates?',
                                            width=self._width,
                                            variable=self.coordinates_var,
                                            onvalue=True, offvalue=False,)
+        # TODO: use secure entries instead of labels
         checkers_used_label = tk.Label(text='Checkers used: 0',
                                        width=self._width,)
         points_label = tk.Label(text='Points: 0',
@@ -177,6 +190,8 @@ class Menu:
         self.frame.checkers_entry = checkers_entry
         self.frame.goal_label = goal_label
         self.frame.goal_entry = goal_entry
+        self.frame.name_label = name_label
+        self.frame.name_entry = name_entry
         self.frame.coordinates_check = coordinates_check
         self.frame.checkers_used = checkers_used_label
         self.frame.points = points_label
@@ -193,10 +208,13 @@ class Menu:
             checkers=self.checkers_var.get(),
         )
         # Show hidden buttons
+        # TODO: pack them only on start
         self.frame.save.pack(side=tk.BOTTOM)
         self.frame.reset.pack(side=tk.BOTTOM)
         self.frame.points.pack(side=tk.BOTTOM)
         self.frame.checkers_used.pack(side=tk.BOTTOM)
+        self.frame.name_entry.pack(side=tk.BOTTOM)
+        self.frame.name_label.pack(side=tk.BOTTOM)
         self.frame.draw.configure(text='Redraw')
 
     def clear_field(self):
@@ -216,7 +234,9 @@ class Menu:
         self.update_points_label()
 
     def save(self):
-        self.app.save()
+        self.app.name = self.name_var.get()
+        if self.save_dialog():
+            self.app.save()
 
     def update_chackers_used_label(self):
         self.frame.checkers_used.configure(text='Checkers used: {}'.format(
@@ -227,6 +247,15 @@ class Menu:
         self.frame.points.configure(text='Points: {}'.format(
             self.app.points
         ))
+
+    def save_dialog(self):
+        return tkmb.askquestion(
+            title='Saving',
+            message=self._save_dialog_tmp.format(
+                name=self.app.name,
+                points=self.app.points,
+            )
+        )
 
 
 # main Application
@@ -239,6 +268,7 @@ class App:
     _checkers = s.CHECKERS
     _goal = s.GOAL
     _coordinates = s.COORDINATES
+    _name = '---'
 
     def __init__(self, master):
         self.master = master
@@ -259,16 +289,11 @@ class App:
         self.goal = None
         self.coordinates = None
         self.checkers_used_list = []
-        self.points = 0
+        self.points = None
+        self.name = None
 
     def set_goal(self, goal: int):
         self.goal = goal
-
-    def save_dialog(self):
-        return tksd.askstring(title='Saving',
-                              prompt='You have {} points.\nEnter the name.'.format(
-                                  self.points
-                              ))
 
     def can_put(self):
         if len(self.checkers_used_list) < self.checkers:
@@ -304,7 +329,7 @@ class App:
 
     def save(self):
         lg.team_lg.info('Name: "{name}" Points: {points} Checkers: {checkers}'.format(
-            name=self.save_dialog(),
+            name=self.name,
             points=self.points,
             checkers=self.checkers_used_list,
         ))
