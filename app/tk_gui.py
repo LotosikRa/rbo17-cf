@@ -72,10 +72,7 @@ class Field:
         # configure frame
         self.frame.configure(background=self._background)
 
-    def draw(self, **kwargs):
-        self.app.checkers = kwargs.get('checkers', self.app._checkers)
-        self.app.rows = kwargs.get('rows', self.app._rows)
-        self.app.columns = kwargs.get('columns', self.app._columns)
+    def draw(self):
         # draw widgets
         for y in range(self.app.rows):
             for x in range(self.app.columns):
@@ -103,26 +100,24 @@ class Menu:
             Name: {name}
             Points: {points}'''
 
+    _goal_values = tuple(range(3, 5 + 1))
+    _checkers_values = tuple(range(12, 20 + 1))
+    _columns_values = tuple(range(4, 15 + 1))
+    _rows_values = tuple(range(4, 15 + 1))
+
     def __init__(self, app, frame):
         self.app = app
         self.frame = frame
-        self.define_variables()
+        self._define_variables()
         # draw
         self.frame.configure(background=self._background)
         self.draw()
 
-    def define_variables(self):
-        self.columns_var = tk.IntVar()
-        self.rows_var = tk.IntVar()
-        self.checkers_var = tk.IntVar()
-        self.goal_var = tk.IntVar()
+    def _define_variables(self):
         self.coordinates_var = tk.BooleanVar()
         self.name_var = tk.StringVar()
         # set defaults
-        self.columns_var.set(self.app._columns)
-        self.rows_var.set(self.app._rows)
-        self.checkers_var.set(self.app._checkers)
-        self.goal_var.set(self.app._goal)
+        # TODO: use self-attributes
         self.coordinates_var.set(self.app._coordinates)
         self.name_var.set(self.app._name)
 
@@ -142,20 +137,28 @@ class Menu:
                                 bg=self._save_bg)
         columns_label = tk.Label(text='Columns:',
                                  width=self._width)
-        columns_entry = tk.Entry(textvariable=self.columns_var,
-                                 width=self._width)
+        columns_spinbox = tk.Spinbox(
+            values=self._columns_values,
+            width=self._width,
+        )
         rows_label = tk.Label(text='Rows:',
                               width=self._width)
-        rows_entry = tk.Entry(textvariable=self.rows_var,
-                              width=self._width,)
+        rows_spinbox = tk.Spinbox(
+            values=self._rows_values,
+            width=self._width,
+        )
         checkers_label = tk.Label(text='Checkers:',
                                   width=self._width)
-        checkers_entry = tk.Entry(textvariable=self.checkers_var,
-                                  width=self._width,)
+        checkers_spinbox = tk.Spinbox(
+            values=self._checkers_values,
+            width=self._width,
+        )
         goal_label = tk.Label(text='Goal:',
                               width=self._width)
-        goal_entry = tk.Entry(textvariable=self.goal_var,
-                              width=self._width,)
+        goal_spinbox = tk.Spinbox(
+            values=self._goal_values,
+            width=self._width,
+        )
         name_label = tk.Label(text='Name:',
                               width=self._width,)
         name_entry = tk.Entry(textvariable=self.name_var,
@@ -170,26 +173,27 @@ class Menu:
         points_label = tk.Label(text='Points: 0',
                                 width=self._width)
         # pack
+        # TODO: use grid instead + use new width (6 , 3)
         draw_button.pack(side=tk.TOP)
         columns_label.pack(side=tk.TOP)
-        columns_entry.pack(side=tk.TOP)
+        columns_spinbox.pack(side=tk.TOP)
         rows_label.pack(side=tk.TOP)
-        rows_entry.pack(side=tk.TOP)
+        rows_spinbox.pack(side=tk.TOP)
         checkers_label.pack(side=tk.TOP)
-        checkers_entry.pack(side=tk.TOP)
+        checkers_spinbox.pack(side=tk.TOP)
         goal_label.pack(side=tk.TOP)
-        goal_entry.pack(side=tk.TOP)
+        goal_spinbox.pack(side=tk.TOP)
         coordinates_check.pack(side=tk.TOP)
         # bind
         self.frame.draw = draw_button
         self.frame.columns_label = columns_label
-        self.frame.columns_entry = columns_entry
+        self.frame.columns_spinbox = columns_spinbox
         self.frame.rows_label = rows_label
-        self.frame.rows_entry = rows_entry
+        self.frame.rows_spinbox = rows_spinbox
         self.frame.checkers_label = checkers_label
-        self.frame.checkers_entry = checkers_entry
+        self.frame.checkers_spinbox = checkers_spinbox
         self.frame.goal_label = goal_label
-        self.frame.goal_entry = goal_entry
+        self.frame.goal_spinbox = goal_spinbox
         self.frame.name_label = name_label
         self.frame.name_entry = name_entry
         self.frame.coordinates_check = coordinates_check
@@ -200,14 +204,17 @@ class Menu:
 
     def draw_field(self):
         self.clear_field()
-        self.app.set_goal(self.goal_var.get())
-        self.app.coordinates = self.coordinates_var.get()
-        self.app.field.draw(
-            columns=self.columns_var.get(),
-            rows=self.rows_var.get(),
-            checkers=self.checkers_var.get(),
-        )
+        self.update_app_variables()
+        self.app.field.draw()
         # Show hidden buttons
+        self.show_bottom_panel()
+
+    def update_app_variables(self):
+        self.app.columns = int(self.frame.columns_spinbox.get())
+        self.app.rows = int(self.frame.rows_spinbox.get())
+        self.app.coordinates = self.coordinates_var.get()
+
+    def show_bottom_panel(self):
         # TODO: pack them only on start
         self.frame.save.pack(side=tk.BOTTOM)
         self.frame.reset.pack(side=tk.BOTTOM)
@@ -257,6 +264,9 @@ class Menu:
             )
         )
 
+    def get_checkers(self):
+        return int(self.frame.checkers_spinbox.get())
+
 
 # main Application
 class App:
@@ -292,10 +302,11 @@ class App:
         self.points = None
         self.name = None
 
-    def set_goal(self, goal: int):
-        self.goal = goal
+    def update_goal(self):
+        self.goal = int(self.menu.frame.goal_spinbox.get())
 
     def can_put(self):
+        self.checkers = self.menu.get_checkers()
         if len(self.checkers_used_list) < self.checkers:
             return True
         else:
@@ -335,6 +346,7 @@ class App:
         ))
 
     def _calculate(self):
+        self.update_goal()
         return algo.calculate(self.checkers_used_list, self.goal)
 
 
