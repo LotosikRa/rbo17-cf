@@ -1,16 +1,25 @@
 import sys
 
+
+# ==========
 # Game Rules
+# ==========
 COLUMNS = 15
 ROWS = 15
 CHECKERS = 12
 GOAL = 4
 
+
+# =======
 # Logging
+# =======
 CALC_LOGFILE = 'calc.log'
 TEAM_LOGFILE = 'names.log'
 
-# Design
+
+# ================
+# Design (Tkinter)
+# ================
 COORDINATES = True
 
 FIELD_BACKGROUND = 'grey'
