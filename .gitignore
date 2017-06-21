@@ -1,8 +1,11 @@
 # IDE configs
-.idea
+.idea/
 
 # PyCode
 *.pyc
 
 # logs
 *.log
+
+# pytest
+.cache/

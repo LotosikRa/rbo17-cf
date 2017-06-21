@@ -55,12 +55,15 @@ sample4 = '0,0 1,0 2,0 3,0 4,0 0,1 1,1 3,1 4,1 0,2 2,2 4,2' \
 """
 
 
+samples = [(sample1, 6),
+           (sample2, 4),
+           (sample3, 4),
+           (sample4, 10)]
+
+
 if __name__ == '__main__':
     # prints all existed examples
-    for e in [sample1,
-              sample2,
-              sample3,
-              sample4,]:
+    for e, _ in samples:
         print('\tStart:')
         array = get_array(parse_string_to_array(e))
         for i in range(len(array)):
