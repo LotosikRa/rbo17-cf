@@ -16,8 +16,8 @@ def greatest_common_divisor(a, b):
     return a
 
 
-def _check_type(obj, expected) -> object:
-    if type(obj) != expected:
+def _check_type(obj, *expected) -> object:
+    if type(obj) not in expected:
         raise RuntimeError('Expected type: "{}", got: "{}".'.format(type(obj), expected))
     return obj
 
@@ -30,6 +30,7 @@ class Dot:
 
     dots = []
     """ Field for storing all instantiated `Dot` objects. """
+    build_all_lines = False
 
     def __init__(self, x: int, y: int):
         self.x = x
@@ -49,7 +50,7 @@ class Dot:
                 vector = Vector(self, dot).register()  # add vector to storage
                 self.check_connection(vector, dot)
 
-    def check_connection(self, vector: object, dot: object):
+    def check_connection(self, vector, dot):
         """ Checks if `self` have connection to this `dot` by this `vector`.
         If have, than creates new Chain, else store it in `vectors` dictionary.
         **Note**: this method is the most important """
@@ -63,6 +64,8 @@ class Dot:
             # add `dot` to the dictionary with `vector` as key, to
             # have access to this later
             self.vectors[vector] = dot
+            if self.build_all_lines:
+                Chain(vector, self).add(dot).register()
 
 
 class Vector:
@@ -193,16 +196,43 @@ class Algorithm:
         self.Vector.vectors = []
         self.Chain.chains = []
 
-    def calculate(self, array, goal=GOAL) -> int:
+    def calculate(self, array: list or tuple, goal: int =GOAL, build_all_lines: bool =False, auto_correct: bool =True) -> int:
         """ Calculates how main points you have.
         Initiates all objects, counts points, logs result."""
         points = ''
+        # checking input data
+        _check_type(goal, int)
+        _check_type(build_all_lines, bool)
+        _check_type(auto_correct, bool)
+        _check_type(array, list, tuple)
+        if goal == 2 and not build_all_lines:
+            if auto_correct:
+                calc_lg.debug('Cannot calculate when "build_all_lines" is "False".')
+                build_all_lines = True
+                calc_lg.debug('Auto-correction performed: set "build_all_lines" to "True".')
+            else:
+                msg = 'Cannot calculate when "build_all_lines" is "False" and "goal" is "2".'
+                calc_lg.error(msg)
+                raise RuntimeError(msg)
+        elif goal < 2:  # we cannot build Chain with less then 2 dots inside
+            raise RuntimeError('Cannot calculate when "goal < 2".')
+        elif build_all_lines:
+            if auto_correct:
+                calc_lg.debug('Overhead: "build_all_lines" will increase calculation time, setting it to "False".')
+                build_all_lines = False
+                calc_lg.debug('Auto-correction performed: set "build_all_lines" to "False".')
+            else:
+                calc_lg.debug('Overhead: "build_all_lines" will increase calculation time')
+        else:
+            calc_lg.debug('Starting calculation.')
+        # actually calculation
         try:
+            self.Dot.build_all_lines = build_all_lines
             self.init_dots(array)
             self.init_vectors()
             points = self._get_points(goal)
         except Exception as e:
-            calc_lg.error(e)
+            calc_lg.exception(e, exc_info=True)
             points = 'ERROR'
             raise e
         else:
