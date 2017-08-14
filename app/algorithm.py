@@ -18,7 +18,9 @@ def greatest_common_divisor(a, b):
 
 def _check_type(obj, *expected) -> object:
     if type(obj) not in expected:
-        raise RuntimeError('Expected type: "{}", got: "{}".'.format(type(obj), expected))
+        raise RuntimeError(
+            'Expected type: "{object_type}", got: "{expected_type}".'.format(
+                object_type=type(obj), expected_type=expected))
     return obj
 
 
@@ -28,7 +30,7 @@ def _check_type(obj, *expected) -> object:
 class Dot:
     """ Represents dots on the xOy (e.g. checkers on the field). """
 
-    dots = []
+    dots = set()
     """ Field for storing all instantiated `Dot` objects. """
     build_all_lines = False
 
@@ -36,9 +38,8 @@ class Dot:
         self.x = x
         self.y = y
         self.vectors = {}
-        self.chains = []
         # to not use custom `register` method as for `Chain` and `Vector`
-        self.dots.append(self)
+        self.dots.add(self)
 
     def __repr__(self):
         return '<Dot x:{} y:{}>'.format(self.x, self.y)
@@ -71,7 +72,7 @@ class Dot:
 class Vector:
     """ Represents connections between Dots (e.g. lines between checkers). """
 
-    vectors = []
+    vectors = set()
     """ Field for storing all vectors together. """
 
     def __init__(self, dot1: Dot, dot2: Dot):
@@ -110,32 +111,38 @@ class Vector:
                 del self  # very dangerous place !!!
                 return item
         else:
-            self.vectors.append(self)
+            self.vectors.add(self)
             return self
 
 
 class Chain:
-    """ Represents groups of Dots connected with the same Vectors (e.g. checkers on one line). """
+    """
+    Represents groups of Dots connected with the same Vectors
+    (e.g. checkers on one line).
+    """
 
-    chains = []
+    chains = set()
     """ Field for storing all Chain objects. """
 
     def __init__(self, vector: Vector, dot1: Dot):
         _check_type(vector, Vector)
         _check_type(dot1, Dot)
         self.vector = vector
-        self.dots = [dot1]
-        self.len = 1
+        self.dots = {dot1}
+
+    @property
+    def len(self):
+        return len(self.dots)
 
     def __repr__(self):
-        return '<Chain [Vector: {}, len: {}, first Dot: {}]>'.format(self.vector, self.len, self.dots[0])
+        return '<Chain [Vector: {}, len: {}, dots: {}]>'\
+            .format(self.vector, self.len, self.dots)
 
     def add(self, dot: Dot):
-        """ If `dot` isn't in `dots` attribute (list) - append it and
+        """ If `dot` isn't in `dots` attribute (set) - append it and
         increment `len` attribute. """
         if dot not in self.dots:
-            self.dots.append(dot)
-            self.len += 1
+            self.dots.add(dot)
         return self
 
     def _check_in(self, other):
@@ -166,7 +173,7 @@ class Chain:
                 del self
                 return item
         else:
-            self.chains.append(self)
+            self.chains.add(self)
             return self
 
 
@@ -192,9 +199,9 @@ class Algorithm:
         # this definition must remove all references to
         # created objects, so garbage collector must
         # delete them for ever
-        self.Dot.dots = []
-        self.Vector.vectors = []
-        self.Chain.chains = []
+        self.Dot.dots = set()
+        self.Vector.vectors = set()
+        self.Chain.chains = set()
 
     def calculate(self, array: list or tuple, goal: int =GOAL, build_all_lines: bool =False, auto_correct: bool =True) -> int:
         """ Calculates how main points you have.
