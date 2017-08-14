@@ -1,19 +1,36 @@
-from app import algo, examples as e, parse_string_to_array as psta
+from app import algo, examples
+from app.cli_tools import parse_string_to_array
 
 
-try:
-    import pytest
-except ImportError:
-    pass
-else:
-    @pytest.mark.parametrize('array, expected, goal', [(psta(s), e, g) for s, e, g in e.samples],
-                             ids=[str(i) for i in range(1, len(e.samples) + 1)])
-    def test_sample(array: list, expected: int, goal: int, benchmark):
-        assert benchmark(algo.calculate, array, goal) == expected
-finally:
-    if __name__ == '__main__':
-        assert algo.calculate(psta(e.sample1), 4) == 6
-        assert algo.calculate(psta(e.sample2), 4) == 4
-        assert algo.calculate(psta(e.sample3), 4) == 4
-        assert algo.calculate(psta(e.sample4), 4) == 10
-        print('Tests completed.')
+def run_sample(sample_string: str, goal: int):
+    return algo.calculate(parse_string_to_array(sample_string), goal)
+
+
+def print_test_result(text: str, string, goal, expected, result):
+    message = '{text} for: string_form="{string}"\n\tgoal={goal}\texpected={expected}\tresult={result}'
+    print(message.format(**locals()))
+
+
+def test_samples(verbose=True, raise_immidiately=False):
+    if not verbose and not raise_immidiately:
+        raise RuntimeError('Wrong arguments.')
+    for string, expected, goal in examples.samples:
+        result = run_sample(string, goal)
+        text = '!!! unknown behavior'
+        try:
+            assert result == expected
+        except AssertionError:
+            text = '!!! Wrong test result'
+            if raise_immidiately:
+                raise
+        else:
+            text = '... Successful test'
+        finally:
+            if verbose:
+                print_test_result(text, string, expected, goal, result)
+
+
+if __name__ == '__main__':
+    print('=' * 20, 'Starting tests', '=' * 20)
+    test_samples()
+    print('=' * 20, 'Tests completed', '=' * 20)
